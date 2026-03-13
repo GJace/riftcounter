@@ -7,9 +7,33 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: #fff;
+    --fg: #000;
+    --bg2: #eee;
+    --border: #000;
+    --border-dim: #ddd;
+    --text-dim: #444;
+    --text-faint: #bbb;
+    --text-empty: #bbb;
+    --history-active: #fee;
+  }
+
+  body.dark {
+    --bg: #111;
+    --fg: #fff;
+    --bg2: #222;
+    --border: #fff;
+    --border-dim: #444;
+    --text-dim: #bbb;
+    --text-faint: #555;
+    --text-empty: #555;
+    --history-active: #311;
+  }
+
   body {
-    background: #fff;
-    color: #000;
+    background: var(--bg);
+    color: var(--fg);
     font-family: system-ui, sans-serif;
     height: 100dvh;
     overflow: hidden;
@@ -27,7 +51,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px 10px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     gap: 6px;
   }
@@ -48,8 +72,8 @@
 
   .hbtn {
     background: none;
-    border: 1px solid #000;
-    color: #000;
+    border: 1px solid var(--border);
+    color: var(--fg);
     font-family: inherit;
     font-size: 0.68rem;
     font-weight: 700;
@@ -60,9 +84,15 @@
     letter-spacing: 0.05em;
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    height: 26px;
   }
-  .hbtn:active { background: #000; color: #fff; }
-  .hbtn.active { background: #000; color: #fff; }
+  .hbtn svg { display: block; }
+  .hbtn:active { background: var(--fg); color: var(--bg); }
+  .hbtn.active { background: var(--fg); color: var(--bg); }
 
   /* ── PLAYERS GRID ── */
   .players {
@@ -78,7 +108,7 @@
     flex-direction: column;
     overflow: hidden;
   }
-  .player:first-child { border-right: 1px solid #000; }
+  .player:first-child { border-right: 1px solid var(--border); }
 
   /* ── CHAMPION PORTRAIT ── */
   .champion-frame {
@@ -86,12 +116,10 @@
     width: 100%;
     height: 60px;
     overflow: hidden;
-    background: #eee;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -143,23 +171,22 @@
   }
 
   .champion-arrow {
-    width: 36px;
+    flex: 1;
     height: 60px;
-    background: #fff;
+    background: var(--bg);
     border: none;
-    border-left: 1px solid #000;
+    border-left: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #000;
+    color: var(--fg);
     font-size: 1.4rem;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     line-height: 1;
-    flex-shrink: 0;
   }
-  .champion-arrow:first-child { border-left: none; border-right: 1px solid #000; }
-  .champion-arrow:active { background: #000; color: #fff; }
+  .champion-arrow:first-child { border-left: none; border-right: 1px solid var(--border); }
+  .champion-arrow:active { background: var(--fg); color: var(--bg); }
 
   /* ── MIDDLE ── */
   .middle {
@@ -174,12 +201,13 @@
   }
 
   .score-number {
-    font-size: clamp(4.5rem, 20vw, 8rem);
+    font-size: clamp(6rem, 26vw, 11rem);
     font-weight: 900;
     line-height: 1;
-    color: #000;
+    color: var(--fg);
     flex-shrink: 0;
     transition: transform 0.12s;
+    padding: 10px 0;
   }
   .score-number.bump { transform: scale(1.18); }
 
@@ -188,7 +216,7 @@
     width: 100%;
     flex: 1;
     overflow-y: auto;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--border-dim);
     padding-top: 4px;
     display: flex;
     flex-direction: column;
@@ -198,7 +226,7 @@
 
   .history-empty {
     font-size: 0.6rem;
-    color: #bbb;
+    color: var(--text-faint);
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -214,7 +242,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .history-item:active { background: #fee; }
+  .history-item:active { background: var(--history-active); }
 
   .history-dot {
     width: 6px;
@@ -229,7 +257,7 @@
   .history-text {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #444;
+    color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     flex: 1;
@@ -240,36 +268,36 @@
 
   .history-undo {
     font-size: 0.75rem;
-    color: #bbb;
+    color: var(--text-faint);
     flex-shrink: 0;
   }
 
   /* ── BUTTONS ── */
   .action-buttons {
     flex-shrink: 0;
-    border-top: 1px solid #000;
+    border-top: 1px solid var(--border);
   }
 
   .btn {
     display: block;
     width: 100%;
     padding: 14px 6px;
-    background: #fff;
+    background: var(--bg);
     border: none;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--border);
     font-family: inherit;
     font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     cursor: pointer;
-    color: #000;
+    color: var(--fg);
     -webkit-tap-highlight-color: transparent;
   }
   .btn:last-child { border-bottom: none; }
-  .btn:active { background: #000; color: #fff; }
+  .btn:active { background: var(--fg); color: var(--bg); }
   .btn-main {
-    padding: 21px 6px;
+    padding: 28px 6px;
     font-size: 1.1rem;
   }
 
@@ -290,8 +318,8 @@
   .modal-overlay.visible { opacity: 1; pointer-events: all; }
 
   .modal {
-    background: #fff;
-    border: 1px solid #000;
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 6px;
     padding: 20px;
     width: 100%;
@@ -304,22 +332,24 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 10px;
+    text-align: center;
   }
 
   .modal p {
     font-size: 0.9rem;
     line-height: 1.5;
     margin-bottom: 16px;
-    color: #333;
+    color: var(--text-dim);
+    text-align: center;
   }
-  .modal p span { font-weight: 700; color: #000; }
+  .modal p span { font-weight: 700; color: var(--fg); }
 
   .modal-buttons { display: flex; gap: 8px; }
 
   .modal-btn {
     flex: 1;
     padding: 10px;
-    border: 1px solid #000;
+    border: 1px solid var(--border);
     border-radius: 3px;
     font-family: inherit;
     font-size: 0.75rem;
@@ -327,11 +357,11 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
-    background: #fff;
-    color: #000;
+    background: var(--bg);
+    color: var(--fg);
     -webkit-tap-highlight-color: transparent;
   }
-  .modal-btn:active { background: #000; color: #fff; }
+  .modal-btn:active { background: var(--fg); color: var(--bg); }
 
   /* ── TOAST ── */
   .toast {
@@ -339,8 +369,8 @@
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%) translateY(8px);
-    background: #000;
-    color: #fff;
+    background: var(--fg);
+    color: var(--bg);
     border-radius: 4px;
     padding: 8px 16px;
     font-size: 0.78rem;
@@ -360,10 +390,11 @@
 
 <div class="app">
   <div class="header">
-    <h1>Riftbound</h1>
+    <h1>RiftCounter</h1>
     <div class="header-controls">
       <button class="hbtn" id="btn-bo" onclick="cycleBo()">Bo1</button>
-      <button class="hbtn" id="btn-aspirant" onclick="cycleAspirant()">Aspirant: No</button>
+      <button class="hbtn" id="btn-aspirant" onclick="cycleAspirant()">Aspirant: 0</button>
+      <button class="hbtn" id="btn-theme" onclick="toggleTheme()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
       <button class="hbtn" onclick="promptReset()">Reset</button>
     </div>
   </div>
@@ -372,11 +403,11 @@
 
 <!-- Modal: Geez -->
 <div class="modal-overlay" id="modal-geez">
-  <div class="modal">
+  <div class="modal" style="max-width: 280px;">
     <h2>GG EZ</h2>
-    <p>That's a lot of points.</p>
+    <p>That's enough points to win.</p>
     <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-geez')">OK</button>
+      <button class="modal-btn" onclick="closeModal('modal-geez')">Well Played</button>
     </div>
   </div>
 </div>
@@ -384,7 +415,6 @@
 <!-- Modal: Delete last point -->
 <div class="modal-overlay" id="modal-delete">
   <div class="modal">
-    <h2>Undo Point</h2>
     <p id="modal-delete-text">Delete last point scored?</p>
     <div class="modal-buttons">
       <button class="modal-btn" onclick="closeModal('modal-delete')">Cancel</button>
@@ -464,6 +494,20 @@ function saveSettings() {
   try { localStorage.setItem('riftbound_settings', JSON.stringify(settings)); } catch(e) {}
 }
 
+function toggleTheme() {
+  settings.dark = !settings.dark;
+  applyTheme();
+  saveSettings();
+}
+
+function applyTheme() {
+  document.body.classList.toggle('dark', !!settings.dark);
+  const btn = document.getElementById('btn-theme');
+  if (btn) btn.innerHTML = settings.dark
+    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+}
+
 function cycleAspirant() {
   settings.aspirant = (settings.aspirant + 1) % 3;
   saveSettings();
@@ -477,7 +521,7 @@ function cycleBo() {
 }
 
 function updateHeaderButtons() {
-  const aspirantLabels = ['Aspirant: No', 'Aspirant: 1', 'Aspirant: 2'];
+  const aspirantLabels = ['Aspirant: 0', 'Aspirant: 1', 'Aspirant: 2'];
   const ab = document.getElementById('btn-aspirant');
   if (ab) {
     ab.textContent = aspirantLabels[settings.aspirant];
@@ -577,9 +621,11 @@ function render() {
     const btns = document.createElement('div');
     btns.className = 'action-buttons';
     btns.innerHTML = `
-      <button class="btn btn-main" onclick="addPoint(${pi},'conq','Conquer')">Conquer</button>
-      <button class="btn btn-main" onclick="addPoint(${pi},'hold','Hold')">Hold</button>
-      <button class="btn" onclick="addPoint(${pi},'other','Other')">Other</button>
+      <button class="btn btn-main" style="border-bottom: none;" onclick="addPoint(${pi},'conq','Conquer')">Conquer</button>
+      <div style="display:flex; align-items: stretch; border-top: 1px solid var(--border);">
+        <button class="btn btn-main" style="flex: 7; border-right: 1px solid var(--border); border-top: none; border-bottom: none;" onclick="addPoint(${pi},'hold','Hold')">Hold</button>
+        <button class="btn btn-main" style="flex: 3; border-top: none; border-bottom: none;" onclick="addPoint(${pi},'other','Other')">Other</button>
+      </div>
     `;
     col.appendChild(btns);
 
@@ -652,6 +698,7 @@ loadSettings();
 loadState();
 render();
 updateHeaderButtons();
+applyTheme();
 
 // ── WAKE LOCK ──
 let wakeLock = null;
