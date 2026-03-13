@@ -84,13 +84,24 @@
   .champion-frame {
     position: relative;
     width: 100%;
-    aspect-ratio: 1;
+    height: 60px;
     overflow: hidden;
     background: #eee;
     border-bottom: 1px solid #000;
     flex-shrink: 0;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  .champion-img-wrap {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    overflow: hidden;
+    cursor: pointer;
   }
 
   .champion-img {
@@ -110,42 +121,45 @@
 
   .champion-name {
     position: absolute;
-    bottom: 5px;
+    bottom: 3px;
     left: 0; right: 0;
     text-align: center;
-    font-size: 0.62rem;
+    font-size: 0.5rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     color: #fff;
     text-transform: uppercase;
-    padding: 0 4px;
+    padding: 0 2px;
     pointer-events: none;
   }
 
   .champion-arrows {
-    position: absolute;
-    top: 0; bottom: 0; left: 0; right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4px;
-  }
-
-  .champion-arrow {
-    width: 26px;
-    height: 26px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    font-size: 1.1rem;
+    gap: 6px;
+    flex: 1;
+    padding: 0 8px;
+  }
+
+  .champion-arrow {
+    width: 36px;
+    height: 60px;
+    background: #fff;
+    border: none;
+    border-left: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 1.4rem;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     line-height: 1;
+    flex-shrink: 0;
   }
-  .champion-arrow:active { background: rgba(0,0,0,0.9); }
+  .champion-arrow:first-child { border-left: none; border-right: 1px solid #000; }
+  .champion-arrow:active { background: #000; color: #fff; }
 
   /* ── MIDDLE ── */
   .middle {
@@ -213,7 +227,7 @@
   .history-dot.other { background: #aaa; }
 
   .history-text {
-    font-size: 0.62rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: #444;
     text-transform: uppercase;
@@ -225,7 +239,7 @@
   }
 
   .history-undo {
-    font-size: 0.58rem;
+    font-size: 0.75rem;
     color: #bbb;
     flex-shrink: 0;
   }
@@ -254,6 +268,10 @@
   }
   .btn:last-child { border-bottom: none; }
   .btn:active { background: #000; color: #fff; }
+  .btn-main {
+    padding: 21px 6px;
+    font-size: 1.1rem;
+  }
 
   /* ── MODALS ── */
   .modal-overlay {
@@ -512,15 +530,14 @@ function render() {
     // Champion portrait
     const frame = document.createElement('div');
     frame.className = 'champion-frame';
-    frame.onclick = () => cycleChamp(pi, 1);
     frame.innerHTML = `
-      <img class="champion-img" src="${DD_BASE}/${champ.key}.png" alt="${champ.name}" onerror="this.style.opacity='0'">
-      <div class="champion-overlay"></div>
-      <div class="champion-name">${champ.name}</div>
-      <div class="champion-arrows">
-        <div class="champion-arrow" onclick="event.stopPropagation();cycleChamp(${pi},-1)">&#8249;</div>
-        <div class="champion-arrow" onclick="event.stopPropagation();cycleChamp(${pi},1)">&#8250;</div>
+      <div class="champion-arrow" onclick="cycleChamp(${pi},-1)">&#8249;</div>
+      <div class="champion-img-wrap" onclick="cycleChamp(${pi}, 1)">
+        <img class="champion-img" src="${DD_BASE}/${champ.key}.png" alt="${champ.name}" onerror="this.style.opacity='0'">
+        <div class="champion-overlay"></div>
+        <div class="champion-name">${champ.name}</div>
       </div>
+      <div class="champion-arrow" onclick="cycleChamp(${pi},1)">&#8250;</div>
     `;
     col.appendChild(frame);
 
@@ -560,8 +577,8 @@ function render() {
     const btns = document.createElement('div');
     btns.className = 'action-buttons';
     btns.innerHTML = `
-      <button class="btn" onclick="addPoint(${pi},'conq','Conquer')">Conquer</button>
-      <button class="btn" onclick="addPoint(${pi},'hold','Hold')">Hold</button>
+      <button class="btn btn-main" onclick="addPoint(${pi},'conq','Conquer')">Conquer</button>
+      <button class="btn btn-main" onclick="addPoint(${pi},'hold','Hold')">Hold</button>
       <button class="btn" onclick="addPoint(${pi},'other','Other')">Other</button>
     `;
     col.appendChild(btns);
