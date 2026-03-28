@@ -412,6 +412,18 @@
   </div>
 </div>
 
+<!-- Modal: Reset timer -->
+<div class="modal-overlay" id="modal-timer-reset">
+  <div class="modal" style="max-width: 280px;">
+    <h2>Reset Timer</h2>
+    <p>Reset the timer back to 60:00?</p>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="closeModal('modal-timer-reset')">Cancel</button>
+      <button class="modal-btn" onclick="confirmTimerReset()">Reset</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Geez -->
 <div class="modal-overlay" id="modal-geez">
   <div class="modal" style="max-width: 280px;">
@@ -530,15 +542,38 @@ let timerInterval = null;
 let timerSeconds = 60 * 60;
 let timerRunning = false;
 
+function loadTimer() {
+  try {
+    const raw = localStorage.getItem('riftbound_timer');
+    if (raw) {
+      const t = JSON.parse(raw);
+      timerSeconds = t.seconds ?? 60 * 60;
+      timerRunning = false; // never auto-resume after refresh
+    }
+  } catch(e) {}
+}
+
+function saveTimer() {
+  try { localStorage.setItem('riftbound_timer', JSON.stringify({ seconds: timerSeconds })); } catch(e) {}
+}
+
 function toggleTimer() {
-  if (timerRunning) {
+  if (timerSeconds <= 0) {
+    timerSeconds = 60 * 60;
     clearInterval(timerInterval);
     timerRunning = false;
+    saveTimer();
     updateTimerBtn();
+    return;
+  }
+
+  if (timerRunning) {
+    openModal('modal-timer-reset');
   } else {
     timerRunning = true;
     timerInterval = setInterval(() => {
       timerSeconds--;
+      saveTimer();
       updateTimerBtn();
       if (timerSeconds <= 0) {
         clearInterval(timerInterval);
@@ -549,6 +584,15 @@ function toggleTimer() {
     }, 1000);
     updateTimerBtn();
   }
+}
+
+function confirmTimerReset() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = 60 * 60;
+  saveTimer();
+  updateTimerBtn();
+  closeModal('modal-timer-reset');
 }
 
 function updateTimerBtn() {
@@ -777,8 +821,10 @@ function showToast(msg) {
 
 loadSettings();
 loadState();
+loadTimer();
 render();
 updateHeaderButtons();
+updateTimerBtn();
 applyTheme();
 
 // ── WAKE LOCK ──
