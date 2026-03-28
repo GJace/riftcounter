@@ -392,13 +392,24 @@
   <div class="header">
     <h1>RiftCounter</h1>
     <div class="header-controls">
-      <button class="hbtn" id="btn-bo" onclick="cycleBo()">Bo1</button>
+      <button class="hbtn" id="btn-timer" onclick="toggleTimer()">60:00</button>
       <button class="hbtn" id="btn-aspirant" onclick="cycleAspirant()">Aspirant: 0</button>
       <button class="hbtn" id="btn-theme" onclick="toggleTheme()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
       <button class="hbtn" onclick="promptReset()">Reset</button>
     </div>
   </div>
   <div class="players" id="players-grid"></div>
+</div>
+
+<!-- Modal: Time's up -->
+<div class="modal-overlay" id="modal-timesup">
+  <div class="modal" style="max-width: 280px;">
+    <h2>Time's Up</h2>
+    <p>60 minutes have passed.</p>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="closeModal('modal-timesup')">OK</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal: Geez -->
@@ -479,7 +490,7 @@ const STORAGE_KEY = 'riftbound_tracker_v3';
 const BASE_MAX = 8;
 
 // Settings (persisted separately)
-let settings = { aspirant: 0, bo: 1 }; // aspirant: 0/1/2, bo: 1/3
+let settings = { aspirant: 0, dark: false };
 
 function maxPoints() { return BASE_MAX + settings.aspirant; }
 
@@ -514,10 +525,39 @@ function cycleAspirant() {
   updateHeaderButtons();
 }
 
-function cycleBo() {
-  settings.bo = settings.bo === 1 ? 3 : 1;
-  saveSettings();
-  updateHeaderButtons();
+// ── TIMER ──
+let timerInterval = null;
+let timerSeconds = 60 * 60;
+let timerRunning = false;
+
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    updateTimerBtn();
+  } else {
+    timerRunning = true;
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimerBtn();
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        timerSeconds = 0;
+        openModal('modal-timesup');
+      }
+    }, 1000);
+    updateTimerBtn();
+  }
+}
+
+function updateTimerBtn() {
+  const btn = document.getElementById('btn-timer');
+  if (!btn) return;
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+  const s = (timerSeconds % 60).toString().padStart(2, '0');
+  btn.textContent = `${m}:${s}`;
+  btn.classList.toggle('active', timerRunning);
 }
 
 function updateHeaderButtons() {
@@ -527,18 +567,16 @@ function updateHeaderButtons() {
     ab.textContent = aspirantLabels[settings.aspirant];
     ab.classList.toggle('active', settings.aspirant > 0);
   }
-  const bb = document.getElementById('btn-bo');
-  if (bb) {
-    bb.textContent = `Bo${settings.bo}`;
-    bb.classList.toggle('active', settings.bo === 3);
-  }
 }
 
 function defaultState() {
-  return { players: [
-    { champIndex: 0, score: 0, history: [] },
-    { champIndex: 1, score: 0, history: [] },
-  ]};
+  return {
+    players: [
+      { champIndex: 0, score: 0 },
+      { champIndex: 1, score: 0 },
+    ],
+    timeline: [] // { pi, type, label }
+  };
 }
 
 let state = defaultState();
@@ -550,7 +588,21 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const loaded = JSON.parse(raw);
-      if (loaded.players?.length === 2) state = loaded;
+      if (loaded.players?.length === 2) {
+        // Migrate old format (per-player history) to timeline
+        if (!loaded.timeline) {
+          loaded.timeline = [];
+          const max = Math.max(loaded.players[0].history?.length || 0, loaded.players[1].history?.length || 0);
+          for (let i = 0; i < max; i++) {
+            [0,1].forEach(pi => {
+              const h = loaded.players[pi].history;
+              if (h && h[i]) loaded.timeline.push({ pi, ...h[i] });
+            });
+          }
+          loaded.players.forEach(p => { delete p.history; });
+        }
+        state = loaded;
+      }
     }
   } catch(e) {}
 }
@@ -597,20 +649,42 @@ function render() {
 
     const hist = document.createElement('div');
     hist.className = 'history-panel';
-    if (player.history.length === 0) {
+
+    const timeline = state.timeline || [];
+    if (timeline.length === 0) {
       hist.innerHTML = `<div class="history-empty">No points yet</div>`;
     } else {
-      [...player.history].reverse().forEach((item, ri) => {
-        const realIndex = player.history.length - 1 - ri;
-        const isLast = realIndex === player.history.length - 1;
+      // Count points per player up to each index for labeling
+      const counts = [0, 0];
+      const labelMap = timeline.map(e => {
+        counts[e.pi]++;
+        return counts[e.pi];
+      });
+
+      // Find the last entry belonging to this player (for undo)
+      let lastOwnIndex = -1;
+      for (let i = timeline.length - 1; i >= 0; i--) {
+        if (timeline[i].pi === pi) { lastOwnIndex = i; break; }
+      }
+
+      [...timeline].reverse().forEach((entry, ri) => {
+        const realIndex = timeline.length - 1 - ri;
+        const isOwn = entry.pi === pi;
+        const isLastOwn = realIndex === lastOwnIndex;
+
         const el = document.createElement('div');
         el.className = 'history-item';
-        el.innerHTML = `
-          <div class="history-dot ${item.type}"></div>
-          <div class="history-text">${item.label} ${realIndex + 1}</div>
-          ${isLast ? '<div class="history-undo">↩ undo</div>' : ''}
-        `;
-        if (isLast) el.addEventListener('click', () => promptDelete(pi));
+
+        if (isOwn) {
+          el.innerHTML = `
+            <div class="history-dot ${entry.type}"></div>
+            <div class="history-text">${entry.label} ${labelMap[realIndex]}</div>
+            ${isLastOwn ? '<div class="history-undo">↩ undo</div>' : ''}
+          `;
+          if (isLastOwn) el.addEventListener('click', () => promptDelete(pi));
+        } else {
+          el.innerHTML = `<div class="history-dot other" style="opacity:0.25;"></div>`;
+        }
         hist.appendChild(el);
       });
     }
@@ -640,30 +714,36 @@ function cycleChamp(pi, dir) {
 
 function addPoint(pi, type, label) {
   const p = state.players[pi];
-  if (p.score >= maxPoints()) {
-    openModal('modal-geez');
-    return;
-  }
+  if (p.score >= maxPoints()) { openModal('modal-geez'); return; }
   p.score++;
-  p.history.push({ type, label });
+  state.timeline.push({ pi, type, label });
   saveState(); render();
   const el = document.getElementById(`score-${pi}`);
   if (el) { el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 150); }
 }
 
 function promptDelete(pi) {
-  if (!state.players[pi].history.length) return;
+  // Find last entry for this player
+  const tl = state.timeline;
+  let lastIdx = -1;
+  for (let i = tl.length - 1; i >= 0; i--) {
+    if (tl[i].pi === pi) { lastIdx = i; break; }
+  }
+  if (lastIdx === -1) return;
   pendingDeletePlayer = pi;
-  const last = state.players[pi].history[state.players[pi].history.length - 1];
-  document.getElementById('modal-delete-text').innerHTML = `Delete last point? (<span>${last.label}</span>)`;
+  document.getElementById('modal-delete-text').innerHTML = `Delete last point? (<span>${tl[lastIdx].label}</span>)`;
   openModal('modal-delete');
 }
 
 function confirmDelete() {
-  const p = state.players[pendingDeletePlayer];
-  if (p.history.length > 0) {
-    p.history.pop();
-    p.score = Math.max(0, p.score - 1);
+  const tl = state.timeline;
+  let lastIdx = -1;
+  for (let i = tl.length - 1; i >= 0; i--) {
+    if (tl[i].pi === pendingDeletePlayer) { lastIdx = i; break; }
+  }
+  if (lastIdx !== -1) {
+    tl.splice(lastIdx, 1);
+    state.players[pendingDeletePlayer].score = Math.max(0, state.players[pendingDeletePlayer].score - 1);
     saveState(); render();
     showToast('Point removed');
   }
@@ -673,7 +753,8 @@ function confirmDelete() {
 function promptReset() { openModal('modal-reset'); }
 
 function confirmReset() {
-  state.players.forEach(p => { p.score = 0; p.history = []; });
+  state.players.forEach(p => { p.score = 0; });
+  state.timeline = [];
   saveState(); render();
   closeModal('modal-reset');
   showToast('Game reset');
