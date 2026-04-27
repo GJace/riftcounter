@@ -536,34 +536,43 @@ const CHAMPIONS = [
   { name: "Ahri",         key: "Ahri" },
   { name: "Annie",        key: "Annie" },
   { name: "Azir",         key: "Azir" },
-  { name: "Caitlyn",      key: "Caitlyn" },
   { name: "Darius",       key: "Darius" },
+  { name: "Diana",        key: "Diana" },
   { name: "Draven",       key: "Draven" },
+  { name: "Evelynn",      key: "Evelynn" },
   { name: "Ezreal",       key: "Ezreal" },
   { name: "Fiora",        key: "Fiora" },
   { name: "Garen",        key: "Garen" },
-  { name: "Heimerdinger", key: "Heimerdinger" },
   { name: "Irelia",       key: "Irelia" },
+  { name: "Ivern",        key: "Ivern" },
   { name: "Jax",          key: "Jax" },
+  { name: "Jhin",         key: "Jhin" },
   { name: "Jinx",         key: "Jinx" },
   { name: "Kai'Sa",       key: "Kaisa" },
+  { name: "Kha'Zix",      key: "Khazix" },
+  { name: "LeBlanc",      key: "Leblanc" },
   { name: "Lee Sin",      key: "LeeSin" },
+  { name: "Lillia",       key: "Lillia" },
   { name: "Lucian",       key: "Lucian" },
   { name: "Lux",          key: "Lux" },
   { name: "Master Yi",    key: "MasterYi" },
   { name: "Ornn",         key: "Ornn" },
+  { name: "Poppy",        key: "Poppy" },
   { name: "Rek'Sai",      key: "RekSai" },
   { name: "Renata Glasc", key: "Renata" },
+  { name: "Rengar",       key: "Rengar" },
   { name: "Rumble",       key: "Rumble" },
+  { name: "Seraphine",    key: "Seraphine" },
   { name: "Sett",         key: "Sett" },
+  { name: "Shen",         key: "Shen" },
   { name: "Sivir",        key: "Sivir" },
   { name: "Teemo",        key: "Teemo" },
   { name: "Vi",           key: "Vi" },
   { name: "Vex",          key: "Vex" },
   { name: "Viktor",       key: "Viktor" },
   { name: "Volibear",     key: "Volibear" },
-  { name: "Warwick",      key: "Warwick" },
   { name: "Yasuo",        key: "Yasuo" },
+  { name: "Zed",          key: "Zed" },
 ];
 
 const STORAGE_KEY = 'riftbound_tracker_v3';
@@ -713,6 +722,9 @@ function loadState() {
           }
           loaded.players.forEach(p => { delete p.history; });
         }
+        loaded.players.forEach(p => {
+          if (p.champIndex >= CHAMPIONS.length) p.champIndex = 0;
+        });
         state = loaded;
       }
     }
