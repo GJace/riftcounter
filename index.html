@@ -384,6 +384,63 @@
     white-space: nowrap;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── CHAMPION PICKER MODAL ── */
+  .modal-champ-picker {
+    max-width: 360px;
+    width: 95vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .champ-picker-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .champ-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    overflow-y: auto;
+    padding: 4px 2px 8px;
+  }
+  .champ-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .champ-option:active { background: var(--bg2); }
+  .champ-option.selected { border-color: var(--border); }
+  .champ-option img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 3px;
+    display: block;
+  }
+  .champ-option span {
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .champ-picker-cancel {
+    margin-top: 12px;
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -454,6 +511,17 @@
     <div class="modal-buttons">
       <button class="modal-btn" onclick="closeModal('modal-reset')">Cancel</button>
       <button class="modal-btn" onclick="confirmReset()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Champion picker -->
+<div class="modal-overlay" id="modal-champ-picker">
+  <div class="modal modal-champ-picker">
+    <div class="champ-picker-title">Choose Champion</div>
+    <div class="champ-grid" id="champ-grid"></div>
+    <div class="modal-buttons champ-picker-cancel">
+      <button class="modal-btn" onclick="closeModal('modal-champ-picker')">Cancel</button>
     </div>
   </div>
 </div>
@@ -672,7 +740,7 @@ function render() {
     frame.className = 'champion-frame';
     frame.innerHTML = `
       <div class="champion-arrow" onclick="cycleChamp(${pi},-1)">&#8249;</div>
-      <div class="champion-img-wrap" onclick="cycleChamp(${pi}, 1)">
+      <div class="champion-img-wrap" onclick="openChampPicker(${pi})">
         <img class="champion-img" src="${DD_BASE}/${champ.key}.png" alt="${champ.name}" onerror="this.style.opacity='0'">
         <div class="champion-overlay"></div>
         <div class="champion-name">${champ.name}</div>
@@ -754,6 +822,26 @@ function render() {
 function cycleChamp(pi, dir) {
   state.players[pi].champIndex = (state.players[pi].champIndex + dir + CHAMPIONS.length) % CHAMPIONS.length;
   saveState(); render();
+}
+
+let _champPickerPlayer = 0;
+
+function openChampPicker(pi) {
+  _champPickerPlayer = pi;
+  const currentIdx = state.players[pi].champIndex;
+  document.getElementById('champ-grid').innerHTML = CHAMPIONS.map((c, i) => `
+    <div class="champ-option${i === currentIdx ? ' selected' : ''}" onclick="selectChamp(${i})">
+      <img src="${DD_BASE}/${c.key}.png" alt="${c.name}" onerror="this.style.opacity='0'">
+      <span>${c.name}</span>
+    </div>
+  `).join('');
+  openModal('modal-champ-picker');
+}
+
+function selectChamp(champIndex) {
+  state.players[_champPickerPlayer].champIndex = champIndex;
+  saveState(); render();
+  closeModal('modal-champ-picker');
 }
 
 function addPoint(pi, type, label) {
