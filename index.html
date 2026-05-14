@@ -307,6 +307,13 @@
       text-overflow: ellipsis;
     }
 
+    .history-num {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
     .history-undo {
       font-size: 0.75rem;
       color: var(--text-faint);
@@ -1165,14 +1172,28 @@
             el.className = 'history-item';
 
             if (isOwn) {
-              el.innerHTML = `
-            <div class="history-dot ${entry.type}"></div>
-            <div class="history-text">${POINT_TYPES[entry.type]} ${labelMap[realIndex]}</div>
-            ${isLastOwn ? '<div class="history-undo">↩ undo</div>' : ''}
-          `;
+              if (pi === 0) {
+                el.innerHTML = `
+              <div class="history-dot ${entry.type}"></div>
+              <div class="history-text">${POINT_TYPES[entry.type]}</div>
+              ${isLastOwn ? '<div class="history-undo">undo</div>' : ''}
+              <div class="history-num">${labelMap[realIndex]}</div>
+            `;
+              } else {
+                el.innerHTML = `
+              <div class="history-num">${labelMap[realIndex]}</div>
+              ${isLastOwn ? '<div class="history-undo">undo</div>' : ''}
+              <div class="history-text" style="text-align:right">${POINT_TYPES[entry.type]}</div>
+              <div class="history-dot ${entry.type}"></div>
+            `;
+              }
               if (isLastOwn) el.addEventListener('click', () => promptDelete(pi));
             } else {
-              el.innerHTML = `<div class="history-dot other" style="opacity:0.25;"></div>`;
+              if (pi === 0) {
+                el.innerHTML = `<div class="history-dot other" style="opacity:0.25;"></div><div class="history-text" style="opacity:0;">—</div>`;
+              } else {
+                el.innerHTML = `<div class="history-text" style="opacity:0;">—</div><div class="history-dot other" style="opacity:0.25;"></div>`;
+              }
             }
             hist.appendChild(el);
           });
