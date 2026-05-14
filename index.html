@@ -441,6 +441,180 @@
     margin-top: 12px;
     flex-shrink: 0;
   }
+
+  /* ── MATCH HISTORY OVERLAY ── */
+  .history-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .history-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .history-overlay-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .history-overlay-title {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .history-stats-bar {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-dim);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .history-match-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .history-match-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-dim);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .history-match-row:active { background: var(--bg2); }
+  .history-match-row.draw { }
+
+  .history-portraits {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .history-portrait {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    object-position: top center;
+    border: 1px solid var(--border-dim);
+    display: block;
+  }
+
+  .history-match-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .history-match-score {
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-match-meta {
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+
+  .history-badge {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 5px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .history-badge { cursor: pointer; }
+
+  .history-match-detail {
+    padding: 8px 10px 10px;
+    border-bottom: 1px solid var(--border-dim);
+    background: var(--bg2);
+  }
+  .history-detail-heading {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .history-detail-tl {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .history-detail-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+  }
+  .history-detail-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .history-detail-dot.conq { background: var(--fg); }
+  .history-detail-dot.hold { background: #666; }
+  .history-detail-dot.other { background: #aaa; }
+  .history-detail-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+  .history-detail-player {
+    color: var(--text-faint);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .history-detail-empty {
+    font-size: 0.65rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .history-no-records {
+    padding: 24px 10px;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+  }
+
+  .history-footer {
+    padding: 10px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
 </style>
 </head>
 <body>
@@ -452,6 +626,7 @@
       <button class="hbtn" id="btn-timer" onclick="toggleTimer()">60:00</button>
       <button class="hbtn" id="btn-aspirant" onclick="cycleAspirant()">Aspirant: 0</button>
       <button class="hbtn" id="btn-theme" onclick="toggleTheme()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+      <button class="hbtn" onclick="openHistory()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
       <button class="hbtn" onclick="promptReset()">Reset</button>
     </div>
   </div>
@@ -484,8 +659,8 @@
 <!-- Modal: Geez -->
 <div class="modal-overlay" id="modal-geez">
   <div class="modal" style="max-width: 280px;">
-    <h2>GG EZ</h2>
-    <p>That's enough points to win.</p>
+    <h2>GG</h2>
+    <p id="modal-geez-text"></p>
     <div class="modal-buttons">
       <button class="modal-btn" onclick="closeModal('modal-geez')">Well Played</button>
     </div>
@@ -503,6 +678,19 @@
   </div>
 </div>
 
+<!-- Modal: Save before reset -->
+<div class="modal-overlay" id="modal-save-before-reset">
+  <div class="modal" style="max-width: 300px;">
+    <h2>Save Match?</h2>
+    <p>Save this match to history before resetting?</p>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="closeModal('modal-save-before-reset')">Cancel</button>
+      <button class="modal-btn" onclick="skipSaveAndReset()">Skip</button>
+      <button class="modal-btn" onclick="saveAndReset()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Reset game -->
 <div class="modal-overlay" id="modal-reset">
   <div class="modal">
@@ -515,6 +703,30 @@
   </div>
 </div>
 
+<!-- Modal: Clear history confirm -->
+<!-- Modal: Change match result -->
+<div class="modal-overlay" id="modal-change-result" style="z-index: 200;">
+  <div class="modal" style="max-width: 280px;">
+    <h2>Change Match Result</h2>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="applyChangeResult('completed', 0)">Win</button>
+      <button class="modal-btn" onclick="applyChangeResult('completed', 1)">Loss</button>
+      <button class="modal-btn" onclick="applyChangeResult('draw', null)">Draw</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-clear-history">
+  <div class="modal" style="max-width: 280px;">
+    <h2>Clear History</h2>
+    <p>Delete all saved match records? This cannot be undone.</p>
+    <div class="modal-buttons">
+      <button class="modal-btn" onclick="closeModal('modal-clear-history')">Cancel</button>
+      <button class="modal-btn" onclick="confirmClearHistory()">Clear</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Champion picker -->
 <div class="modal-overlay" id="modal-champ-picker">
   <div class="modal modal-champ-picker">
@@ -523,6 +735,19 @@
     <div class="modal-buttons champ-picker-cancel">
       <button class="modal-btn" onclick="closeModal('modal-champ-picker')">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- Match History Overlay -->
+<div class="history-overlay" id="history-overlay">
+  <div class="history-overlay-header">
+    <span class="history-overlay-title">Riftcounter History</span>
+    <button class="hbtn" onclick="closeHistory()">&#x2715;</button>
+  </div>
+  <div class="history-stats-bar" id="history-stats-bar"></div>
+  <div class="history-match-list" id="history-match-list"></div>
+  <div class="history-footer">
+    <button class="btn" onclick="openModal('modal-clear-history')">Clear History</button>
   </div>
 </div>
 
@@ -576,6 +801,7 @@ const CHAMPIONS = [
 ];
 
 const STORAGE_KEY = 'riftbound_tracker_v3';
+const HISTORY_KEY = 'riftcounter_history';
 const BASE_MAX = 8;
 
 // Settings (persisted separately)
@@ -702,6 +928,8 @@ function defaultState() {
 
 let state = defaultState();
 let pendingDeletePlayer = null;
+let matchAlreadySaved = false;
+let matchStartedAt = null;
 let saveTimeout = null;
 
 function loadState() {
@@ -858,7 +1086,18 @@ function selectChamp(champIndex) {
 
 function addPoint(pi, type, label) {
   const p = state.players[pi];
-  if (p.score >= maxPoints()) { openModal('modal-geez'); return; }
+  const winner = state.players.findIndex(p => p.score >= maxPoints());
+  if (winner !== -1) {
+    if (!matchAlreadySaved) {
+      saveMatchToHistory(buildMatchRecord('completed', winner));
+      matchAlreadySaved = true;
+    }
+    const champName = CHAMPIONS[state.players[winner].champIndex].name;
+    document.getElementById('modal-geez-text').textContent = `${champName} has reached max points`;
+    openModal('modal-geez');
+    return;
+  }
+  if (!matchStartedAt) matchStartedAt = Date.now();
   p.score++;
   state.timeline.push({ pi, type, label });
   saveState(); render();
@@ -894,11 +1133,35 @@ function confirmDelete() {
   closeModal('modal-delete');
 }
 
-function promptReset() { openModal('modal-reset'); }
+function promptReset() {
+  const hasPoints = state.players.some(p => p.score > 0);
+  if (hasPoints && !matchAlreadySaved) {
+    openModal('modal-save-before-reset');
+  } else {
+    openModal('modal-reset');
+  }
+}
+
+function saveAndReset() {
+  const winnerIdx = state.players.findIndex(p => p.score >= maxPoints());
+  const status = winnerIdx !== -1 ? 'completed' : 'draw';
+  const winner = winnerIdx !== -1 ? winnerIdx : null;
+  saveMatchToHistory(buildMatchRecord(status, winner));
+  closeModal('modal-save-before-reset');
+  openModal('modal-reset');
+  showToast('Match saved');
+}
+
+function skipSaveAndReset() {
+  closeModal('modal-save-before-reset');
+  openModal('modal-reset');
+}
 
 function confirmReset() {
   state.players.forEach(p => { p.score = 0; });
   state.timeline = [];
+  matchAlreadySaved = false;
+  matchStartedAt = null;
   saveState(); render();
   closeModal('modal-reset');
   showToast('Game reset');
@@ -917,6 +1180,199 @@ function showToast(msg) {
   t.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── MATCH HISTORY ──
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return [];
+}
+
+function saveMatchToHistory(record) {
+  try {
+    const records = loadHistory();
+    records.unshift(record);
+    if (records.length > 200) records.splice(200);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(records));
+  } catch(e) {}
+}
+
+function buildMatchRecord(status, winnerIdx) {
+  return {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    duration: matchStartedAt ? Math.floor((Date.now() - matchStartedAt) / 1000) : 0,
+    players: state.players.map((p, i) => ({
+      name: `Player ${i + 1}`,
+      champion: CHAMPIONS[p.champIndex].name,
+      champKey: CHAMPIONS[p.champIndex].key,
+      score: p.score,
+    })),
+    maxPoints: maxPoints(),
+    aspirant: settings.aspirant,
+    winner: winnerIdx,
+    status,
+    timeline: [...state.timeline],
+  };
+}
+
+function fmtDuration(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const s = (secs % 60).toString().padStart(2, '0');
+  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
+
+function openHistory() {
+  renderHistoryOverlay();
+  document.getElementById('history-overlay').classList.add('visible');
+}
+
+function closeHistory() {
+  document.getElementById('history-overlay').classList.remove('visible');
+}
+
+function renderHistoryOverlay() {
+  const records = loadHistory();
+  renderHistoryStats(records);
+  renderHistoryList(records);
+}
+
+function renderHistoryStats(records) {
+  const bar = document.getElementById('history-stats-bar');
+  if (records.length === 0) { bar.textContent = 'No matches yet'; return; }
+
+  const wins = records.filter(r => r.winner === 0).length;
+  const losses = records.filter(r => r.winner === 1).length;
+  const decided = wins + losses;
+  const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+
+  bar.innerHTML = `
+    <span>${records.length} match${records.length !== 1 ? 'es' : ''}</span>
+    <span>${wins}W · ${losses}L</span>
+    ${winRate !== null ? `<span>${winRate}% win rate</span>` : ''}
+  `;
+}
+
+function renderHistoryList(records) {
+  const list = document.getElementById('history-match-list');
+  if (records.length === 0) {
+    list.innerHTML = '<div class="history-no-records">No matches recorded yet</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  let expandedId = null;
+
+  records.forEach(record => {
+    const isDraw = record.status === 'draw' || record.status === 'abandoned'; // backwards-compat
+    const p0 = record.players[0];
+    const p1 = record.players[1];
+    const winnerName = record.winner != null ? record.players[record.winner].champion : null;
+
+    const row = document.createElement('div');
+    row.className = 'history-match-row' + (isDraw ? ' draw' : '');
+    row.innerHTML = `
+      <div class="history-portraits">
+        <img class="history-portrait" src="${DD_BASE}/${p0.champKey}.png" alt="${p0.champion}" onerror="this.style.opacity='0.2'">
+        <img class="history-portrait" src="${DD_BASE}/${p1.champKey}.png" alt="${p1.champion}" onerror="this.style.opacity='0.2'">
+      </div>
+      <div class="history-match-info">
+        <div class="history-match-score">${p0.champion} ${p0.score} — ${p1.score} ${p1.champion}</div>
+        <div class="history-match-meta">${fmtDate(record.date)}</div>
+      </div>
+      <div class="history-badge">${isDraw ? 'Draw' : record.winner === 0 ? 'Win' : 'Loss'}</div>
+    `;
+
+    row.querySelector('.history-badge').addEventListener('click', e => {
+      e.stopPropagation();
+      openChangeResult(record.id);
+    });
+
+    row.addEventListener('click', () => {
+      const existing = row.nextElementSibling;
+      if (existing && existing.classList.contains('history-match-detail')) {
+        existing.remove();
+        expandedId = null;
+        return;
+      }
+      // Close any open detail
+      const openDetail = list.querySelector('.history-match-detail');
+      if (openDetail) openDetail.remove();
+
+      if (expandedId === record.id) { expandedId = null; return; }
+      expandedId = record.id;
+
+      const detail = document.createElement('div');
+      detail.className = 'history-match-detail';
+
+      let tlHtml = '';
+      if (record.timeline && record.timeline.length > 0) {
+        const counts = [0, 0];
+        tlHtml = `<div class="history-detail-tl">` + record.timeline.map(e => {
+          counts[e.pi]++;
+          return `<div class="history-detail-entry">
+            <div class="history-detail-dot ${e.type}"></div>
+            <span class="history-detail-label">${e.label} ${counts[e.pi]}</span>
+            <span class="history-detail-player">${record.players[e.pi].champion}</span>
+          </div>`;
+        }).join('') + `</div>`;
+      } else {
+        tlHtml = `<div class="history-detail-empty">No timeline entries</div>`;
+      }
+
+      const resultLine = isDraw
+        ? 'Draw'
+        : `${winnerName} wins · max ${record.maxPoints}pts`;
+
+      detail.innerHTML = `
+        <div class="history-detail-heading">${resultLine}</div>
+        ${tlHtml}
+      `;
+      row.insertAdjacentElement('afterend', detail);
+    });
+
+    list.appendChild(row);
+  });
+}
+
+let editingRecordId = null;
+
+function openChangeResult(recordId) {
+  editingRecordId = recordId;
+  openModal('modal-change-result');
+}
+
+function applyChangeResult(status, winner) {
+  try {
+    const records = loadHistory();
+    const idx = records.findIndex(r => r.id === editingRecordId);
+    if (idx !== -1) {
+      records[idx].status = status;
+      records[idx].winner = winner;
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(records));
+    }
+  } catch(e) {}
+  closeModal('modal-change-result');
+  renderHistoryOverlay();
+}
+
+function confirmClearHistory() {
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e) {}
+  closeModal('modal-clear-history');
+  renderHistoryOverlay();
+  showToast('History cleared');
 }
 
 loadSettings();
