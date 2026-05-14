@@ -519,9 +519,19 @@
       letter-spacing: 0.03em;
     }
 
-    .champ-picker-cancel {
-      margin-top: 12px;
-      flex-shrink: 0;
+    .champ-set-header {
+      grid-column: 1 / -1;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      padding: 8px 2px 2px;
+      text-align: center;
+    }
+
+    .champ-set-header.first {
+      padding-top: 0;
     }
 
     /* ── MATCH HISTORY OVERLAY ── */
@@ -722,7 +732,6 @@
       letter-spacing: 0.06em;
       color: var(--text-faint);
     }
-
   </style>
 </head>
 
@@ -844,11 +853,7 @@
   <!-- Modal: Champion picker -->
   <div class="modal-overlay" id="modal-champ-picker">
     <div class="modal modal-champ-picker">
-      <div class="champ-picker-title">Choose Champion</div>
       <div class="champ-grid" id="champ-grid"></div>
-      <div class="modal-buttons champ-picker-cancel">
-        <button class="modal-btn" onclick="closeModal('modal-champ-picker')">Cancel</button>
-      </div>
     </div>
   </div>
 
@@ -865,56 +870,75 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const DD_VERSION = '15.1.1';
+    const DD_VERSION = '15.2.1';
     const DD_BASE = `https://ddragon.leagueoflegends.com/cdn/${DD_VERSION}/img/champion`;
 
+    const DOMAINS = [
+      { id: 1, name: "Fury",  color: "#e05252" },
+      { id: 2, name: "Calm",  color: "#52b052" },
+      { id: 3, name: "Mind",  color: "#5282e0" },
+      { id: 4, name: "Body",  color: "#e08c32" },
+      { id: 5, name: "Chaos", color: "#9b52cc" },
+      { id: 6, name: "Order", color: "#d4b800" },
+    ];
+
     const CHAMPIONS = [
-      { name: "Ahri", key: "Ahri", set: "OGN" },
-      { name: "Annie", key: "Annie", set: "OGS" },
-      { name: "Azir", key: "Azir", set: "SFD" },
-      { name: "Darius", key: "Darius", set: "OGN" },
-      { name: "Diana", key: "Diana", set: "UNL" },
-      { name: "Draven", key: "Draven", set: "SFD" },
-      { name: "Ezreal", key: "Ezreal", set: "SFD" },
-      { name: "Fiora", key: "Fiora", set: "SFD" },
-      { name: "Garen", key: "Garen", set: "OGS" },
-      { name: "Irelia", key: "Irelia", set: "SFD" },
-      { name: "Ivern", key: "Ivern", set: "UNL" },
-      { name: "Jax", key: "Jax", set: "SFD" },
-      { name: "Jhin", key: "Jhin", set: "UNL" },
-      { name: "Jinx", key: "Jinx", set: "OGN" },
-      { name: "Kai'Sa", key: "Kaisa", set: "OGN" },
-      { name: "Kha'Zix", key: "Khazix", set: "UNL" },
-      { name: "LeBlanc", key: "Leblanc", set: "UNL" },
-      { name: "Lee Sin", key: "LeeSin", set: "OGN" },
-      { name: "Lillia", key: "Lillia", set: "UNL" },
-      { name: "Lucian", key: "Lucian", set: "SFD" },
-      { name: "Lux", key: "Lux", set: "OGS" },
-      { name: "Master Yi", key: "MasterYi", set: "OGS" },
-      { name: "Ornn", key: "Ornn", set: "SFD" },
-      { name: "Poppy", key: "Poppy", set: "UNL" },
-      { name: "Rek'Sai", key: "RekSai", set: "SFD" },
-      { name: "Renata Glasc", key: "Renata", set: "SFD" },
-      { name: "Rengar", key: "Rengar", set: "UNL" },
-      { name: "Rumble", key: "Rumble", set: "SFD" },
-      { name: "Seraphine", key: "Seraphine", set: null },
-      { name: "Sett", key: "Sett", set: "OGN" },
-      { name: "Shen", key: "Shen", set: null },
-      { name: "Sivir", key: "Sivir", set: "SFD" },
-      { name: "Teemo", key: "Teemo", set: "OGN" },
-      { name: "Vi", key: "Vi", set: "UNL" },
-      { name: "Vex", key: "Vex", set: "UNL" },
-      { name: "Viktor", key: "Viktor", set: "OGN" },
-      { name: "Volibear", key: "Volibear", set: "OGN" },
-      { name: "Yasuo", key: "Yasuo", set: "OGN" },
-      { name: "Zed", key: "Zed", set: null },
+      { name: "Ahri",         key: "Ahri",        sets: ["OGN"],        domains: [2, 3] },
+      { name: "Akali",        key: "Akali",        sets: ["VND"],        domains: [] },
+      { name: "Ambessa",      key: "Ambessa",      sets: ["VND"],        domains: [] },
+      { name: "Annie",        key: "Annie",        sets: ["OGS"],        domains: [] },
+      { name: "Azir",         key: "Azir",         sets: ["SFD"],        domains: [] },
+      { name: "Darius",       key: "Darius",       sets: ["OGN"],        domains: [1, 6] },
+      { name: "Diana",        key: "Diana",        sets: ["UNL"],        domains: [] },
+      { name: "Draven",       key: "Draven",       sets: ["SFD"],        domains: [] },
+      { name: "Ekko",         key: "Ekko",         sets: ["RDN"],        domains: [] },
+      { name: "Evelynn",      key: "Evelynn",      sets: ["RDN"],        domains: [] },
+      { name: "Ezreal",       key: "Ezreal",       sets: ["SFD"],        domains: [] },
+      { name: "Fiora",        key: "Fiora",        sets: ["SFD"],        domains: [] },
+      { name: "Garen",        key: "Garen",        sets: ["OGS"],        domains: [] },
+      { name: "Irelia",       key: "Irelia",       sets: ["SFD"],        domains: [] },
+      { name: "Ivern",        key: "Ivern",        sets: ["UNL"],        domains: [] },
+      { name: "Jax",          key: "Jax",          sets: ["SFD"],        domains: [] },
+      { name: "Jhin",         key: "Jhin",         sets: ["UNL"],        domains: [] },
+      { name: "Jinx",         key: "Jinx",         sets: ["OGN"],        domains: [1, 5] },
+      { name: "Kai'Sa",       key: "Kaisa",        sets: ["OGN"],        domains: [1, 3] },
+      { name: "Kha'Zix",      key: "Khazix",       sets: ["UNL"],        domains: [] },
+      { name: "LeBlanc",      key: "Leblanc",      sets: ["UNL"],        domains: [] },
+      { name: "Lee Sin",      key: "LeeSin",       sets: ["OGN"],        domains: [2, 4] },
+      { name: "Leona",        key: "Leona",        sets: ["OGN"],        domains: [2, 6] },
+      { name: "Lillia",       key: "Lillia",       sets: ["UNL"],        domains: [] },
+      { name: "Lucian",       key: "Lucian",       sets: ["SFD"],        domains: [] },
+      { name: "Lux",          key: "Lux",          sets: ["OGS"],        domains: [3, 6] },
+      { name: "Master Yi",    key: "MasterYi",     sets: ["OGS", "UNL"], domains: [] },
+      { name: "Mel",          key: "Mel",          sets: ["VND"],        domains: [] },
+      { name: "Miss Fortune", key: "MissFortune",  sets: ["OGN"],        domains: [4, 5] },
+      { name: "Nasus",        key: "Nasus",        sets: ["VND"],        domains: [] },
+      { name: "Ornn",         key: "Ornn",         sets: ["SFD"],        domains: [] },
+      { name: "Pyke",         key: "Pyke",         sets: ["UNL"],        domains: [] },
+      { name: "Poppy",        key: "Poppy",        sets: ["UNL"],        domains: [] },
+      { name: "Rek'Sai",      key: "RekSai",       sets: ["SFD"],        domains: [] },
+      { name: "Renekton",     key: "Renekton",     sets: ["VND"],        domains: [] },
+      { name: "Renata Glasc", key: "Renata",       sets: ["SFD"],        domains: [] },
+      { name: "Rengar",       key: "Rengar",       sets: ["UNL"],        domains: [] },
+      { name: "Rumble",       key: "Rumble",       sets: ["SFD"],        domains: [] },
+      { name: "Seraphine",    key: "Seraphine",    sets: ["RDN"],        domains: [] },
+      { name: "Sett",         key: "Sett",         sets: ["OGN"],        domains: [] },
+      { name: "Shen",         key: "Shen",         sets: ["VND"],        domains: [] },
+      { name: "Sivir",        key: "Sivir",        sets: ["SFD"],        domains: [] },
+      { name: "Teemo",        key: "Teemo",        sets: ["OGN"],        domains: [] },
+      { name: "Vi",           key: "Vi",           sets: ["UNL"],        domains: [] },
+      { name: "Vex",          key: "Vex",          sets: ["UNL"],        domains: [] },
+      { name: "Viktor",       key: "Viktor",       sets: ["OGN"],        domains: [] },
+      { name: "Volibear",     key: "Volibear",     sets: ["OGN"],        domains: [] },
+      { name: "Yasuo",        key: "Yasuo",        sets: ["OGN"],        domains: [] },
+      { name: "Zed",          key: "Zed",          sets: ["VND"],        domains: [] },
     ];
 
     const STORAGE_KEY = 'riftbound_tracker_v3';
 
     const POINT_TYPES = {
-      conq:  'Conquer',
-      hold:  'Hold',
+      conq: 'Conquer',
+      hold: 'Hold',
       other: 'Other',
     };
     const HISTORY_KEY = 'riftcounter_history';
@@ -1184,12 +1208,29 @@
     function openChampPicker(pi) {
       _champPickerPlayer = pi;
       const currentIdx = state.players[pi].champIndex;
-      document.getElementById('champ-grid').innerHTML = CHAMPIONS.map((c, i) => `
-    <div class="champ-option${i === currentIdx ? ' selected' : ''}" onclick="selectChamp(${i})">
-      <img src="${DD_BASE}/${c.key}.png" alt="${c.name}" onerror="this.style.opacity='0'">
-      <span>${c.name}</span>
-    </div>
-  `).join('');
+
+      const setOrder = ["OGN", "OGS", "SFD", "UNL", "VND", "RDN"];
+      const setNames = { OGN: "Origins", OGS: "Proving Grounds", SFD: "Spiriftforged", UNL: "Unleashed", VND: "Vendetta", RDN: "Radiance" };
+      const bySet = {};
+      CHAMPIONS.forEach((c, i) => {
+        c.sets.forEach(set => {
+          if (!bySet[set]) bySet[set] = [];
+          bySet[set].push({ c, i });
+        });
+      });
+
+      let html = '';
+      setOrder.forEach((set, si) => {
+        html += `<div class="champ-set-header${si === 0 ? ' first' : ''}">${setNames[set] ?? set}</div>`;
+        bySet[set].forEach(({ c, i }) => {
+          html += `<div class="champ-option${i === currentIdx ? ' selected' : ''}" onclick="selectChamp(${i})">
+            <img src="${DD_BASE}/${c.key}.png" alt="${c.name}" onerror="this.style.opacity='0'">
+            <span>${c.name}</span>
+          </div>`;
+        });
+      });
+
+      document.getElementById('champ-grid').innerHTML = html;
       openModal('modal-champ-picker');
     }
 
