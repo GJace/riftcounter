@@ -691,26 +691,7 @@
       font-size: 0.72rem;
     }
 
-    .history-detail-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .history-detail-dot.conq {
-      background: var(--fg);
-    }
-
-    .history-detail-dot.hold {
-      background: #666;
-    }
-
-    .history-detail-dot.other {
-      background: #aaa;
-    }
-
-    .history-detail-label {
+.history-detail-label {
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -1115,7 +1096,7 @@
 
     function domainIconHtml(champ, type) {
       const domainIdx = type === 'conq' ? 0 : 1;
-      const domainId = champ.domains[domainIdx];
+      const domainId = champ?.domains[domainIdx];
       if (domainId === undefined) return `<div class="history-dot-fb ${type}"></div>`;
       const domain = DOMAINS.find(d => d.id === domainId);
       return `<img class="history-icon" src="${domain.icon}" alt="">`;
@@ -1497,10 +1478,12 @@
             const counts = [0, 0];
             tlHtml = `<div class="history-detail-tl">` + record.timeline.map(e => {
               counts[e.playerId - 1]++;
+              const pl = record.players.find(p => p.id === e.playerId);
+              const entryChamp = CHAMPIONS.find(c => c.key === pl?.champKey);
               return `<div class="history-detail-entry">
-            <div class="history-detail-dot ${e.type}"></div>
+            ${domainIconHtml(entryChamp, e.type)}
             <span class="history-detail-label">${POINT_TYPES[e.type]} ${counts[e.playerId - 1]}</span>
-            <span class="history-detail-player">${(() => { const pl = record.players.find(p => p.id === e.playerId); return CHAMPIONS.find(c => c.key === pl?.champKey)?.name ?? pl?.champKey; })()}</span>
+            <span class="history-detail-player">${entryChamp?.name ?? pl?.champKey}</span>
           </div>`;
             }).join('') + `</div>`;
           } else {
