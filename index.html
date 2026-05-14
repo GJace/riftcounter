@@ -276,24 +276,27 @@
       background: var(--history-active);
     }
 
-    .history-dot {
-      width: 6px;
-      height: 6px;
+    .history-icon {
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    body.dark .history-icon {
+      filter: brightness(0) invert(1);
+    }
+
+    .history-dot-fb {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       flex-shrink: 0;
+      background: var(--fg);
     }
 
-    .history-dot.conq {
-      background: #000;
-    }
-
-    .history-dot.hold {
-      background: #666;
-    }
-
-    .history-dot.other {
-      background: #aaa;
-    }
+    .history-dot-fb.hold { opacity: 0.5; }
+    .history-dot-fb.other { opacity: 0.33; }
 
     .history-text {
       font-size: 0.82rem;
@@ -879,64 +882,64 @@
     const DD_BASE = `https://ddragon.leagueoflegends.com/cdn/${DD_VERSION}/img/champion`;
 
     const DOMAINS = [
-      { id: 1, name: "Fury", color: "#e05252" },
-      { id: 2, name: "Calm", color: "#52b052" },
-      { id: 3, name: "Mind", color: "#5282e0" },
-      { id: 4, name: "Body", color: "#e08c32" },
-      { id: 5, name: "Chaos", color: "#9b52cc" },
-      { id: 6, name: "Order", color: "#d4b800" },
+      { id: 1, name: "Fury",  color: "#e05252", icon: "Fury.png"  },
+      { id: 2, name: "Calm",  color: "#52b052", icon: "Calm.png"  },
+      { id: 3, name: "Mind",  color: "#5282e0", icon: "Mind.png"  },
+      { id: 4, name: "Body",  color: "#e08c32", icon: "Body.png"  },
+      { id: 5, name: "Chaos", color: "#9b52cc", icon: "Chaos.png" },
+      { id: 6, name: "Order", color: "#d4b800", icon: "Order.png" },
     ];
 
     const CHAMPIONS = [
       { name: "Ahri", key: "Ahri", sets: ["OGN"], domains: [2, 3], quote: "A clever fox is never caught." },
       { name: "Akali", key: "Akali", sets: ["VND"], domains: [], quote: "Fear the assassin with no master." },
       { name: "Ambessa", key: "Ambessa", sets: ["VND"], domains: [], quote: "I have never lost a fight that mattered." },
-      { name: "Annie", key: "Annie", sets: ["OGS"], domains: [], quote: "You wanna play too? It'll be fun!" },
-      { name: "Azir", key: "Azir", sets: ["SFD"], domains: [], quote: "Shurima! Your emperor has returned!" },
+      { name: "Annie", key: "Annie", sets: ["OGS"], domains: [1, 5], quote: "You wanna play too? It'll be fun!" },
+      { name: "Azir", key: "Azir", sets: ["SFD"], domains: [2, 6], quote: "Shurima! Your emperor has returned!" },
       { name: "Darius", key: "Darius", sets: ["OGN"], domains: [1, 6], quote: "They will regret opposing me." },
-      { name: "Diana", key: "Diana", sets: ["UNL"], domains: [], quote: "A new moon is rising." },
-      { name: "Draven", key: "Draven", sets: ["SFD"], domains: [], quote: "Welcome to the League of Draven." },
+      { name: "Diana", key: "Diana", sets: ["UNL"], domains: [3, 5], quote: "A new moon is rising." },
+      { name: "Draven", key: "Draven", sets: ["SFD"], domains: [1, 5], quote: "Welcome to the League of Draven." },
       { name: "Ekko", key: "Ekko", sets: ["RDN"], domains: [], quote: "It's not how much time you have, it's how you use it." },
       { name: "Evelynn", key: "Evelynn", sets: ["RDN"], domains: [], quote: "You know you want me." },
       { name: "Ezreal", key: "Ezreal", sets: ["SFD"], domains: [], quote: "Quest accepted! ...Wait, where are we going?" },
-      { name: "Fiora", key: "Fiora", sets: ["SFD"], domains: [], quote: "I long for a worthy opponent." },
-      { name: "Garen", key: "Garen", sets: ["OGS"], domains: [], quote: "My heart and sword always for Demacia." },
-      { name: "Irelia", key: "Irelia", sets: ["SFD"], domains: [], quote: "Fight for the First Lands!" },
-      { name: "Ivern", key: "Ivern", sets: ["UNL"], domains: [], quote: "My favorite color is spring." },
-      { name: "Jax", key: "Jax", sets: ["SFD"], domains: [], quote: "Let's do this." },
-      { name: "Jhin", key: "Jhin", sets: ["UNL"], domains: [], quote: "In carnage, I bloom, like a flower in the dawn." },
+      { name: "Fiora", key: "Fiora", sets: ["SFD"], domains: [4, 6], quote: "I long for a worthy opponent." },
+      { name: "Garen", key: "Garen", sets: ["OGS"], domains: [4, 6], quote: "My heart and sword always for Demacia." },
+      { name: "Irelia", key: "Irelia", sets: ["SFD"], domains: [2, 5], quote: "Fight for the First Lands!" },
+      { name: "Ivern", key: "Ivern", sets: ["UNL"], domains: [2, 6], quote: "My favorite color is spring." },
+      { name: "Jax", key: "Jax", sets: ["SFD"], domains: [2, 4], quote: "Let's do this." },
+      { name: "Jhin", key: "Jhin", sets: ["UNL"], domains: [1, 3], quote: "In carnage, I bloom, like a flower in the dawn." },
       { name: "Jinx", key: "Jinx", sets: ["OGN"], domains: [1, 5], quote: "Rules are made to be broken... like buildings! Or people!" },
       { name: "Kai'Sa", key: "Kaisa", sets: ["OGN"], domains: [1, 3], quote: "They thought the Void took me. It did." },
-      { name: "Kha'Zix", key: "Khazix", sets: ["UNL"], domains: [], quote: "The most dangerous predator... adapts." },
-      { name: "LeBlanc", key: "Leblanc", sets: ["UNL"], domains: [], quote: "They will never see through my deceptions." },
+      { name: "Kha'Zix", key: "Khazix", sets: ["UNL"], domains: [4, 5], quote: "The most dangerous predator... adapts." },
+      { name: "LeBlanc", key: "Leblanc", sets: ["UNL"], domains: [3, 6], quote: "They will never see through my deceptions." },
       { name: "Lee Sin", key: "LeeSin", sets: ["OGN"], domains: [2, 4], quote: "I am blind, but I see more than most." },
       { name: "Leona", key: "Leona", sets: ["OGN"], domains: [2, 6], quote: "The dawn has arrived." },
-      { name: "Lillia", key: "Lillia", sets: ["UNL"], domains: [], quote: "Me? A dream come true." },
-      { name: "Lucian", key: "Lucian", sets: ["SFD"], domains: [], quote: "Everybody dies. Some just need a little help." },
+      { name: "Lillia", key: "Lillia", sets: ["UNL"], domains: [2, 3], quote: "Me? A dream come true." },
+      { name: "Lucian", key: "Lucian", sets: ["SFD"], domains: [1, 4], quote: "Everybody dies. Some just need a little help." },
       { name: "Lux", key: "Lux", sets: ["OGS"], domains: [3, 6], quote: "Let's light it up!" },
-      { name: "Master Yi", key: "MasterYi", sets: ["OGS", "UNL"], domains: [], quote: "My form is perfected." },
+      { name: "Master Yi", key: "MasterYi", sets: ["OGS", "UNL"], domains: [2, 4], quote: "My form is perfected." },
       { name: "Mel", key: "Mel", sets: ["VND"], domains: [], quote: "Power is not taken. It is earned." },
       { name: "Miss Fortune", key: "MissFortune", sets: ["OGN"], domains: [4, 5], quote: "Like my mother used to say: 'Never miss twice.'" },
       { name: "Nasus", key: "Nasus", sets: ["VND"], domains: [], quote: "The cycle of life and death continues, we will live, they will die." },
-      { name: "Ornn", key: "Ornn", sets: ["SFD"], domains: [], quote: "Fine, we go." },
-      { name: "Pyke", key: "Pyke", sets: ["UNL"], domains: [], quote: "Sink 'em all." },
-      { name: "Poppy", key: "Poppy", sets: ["UNL"], domains: [], quote: "I'm no hero—just a Yordle with a hammer." },
-      { name: "Rek'Sai", key: "RekSai", sets: ["SFD"], domains: [], quote: "Rek'Sai growls" },
+      { name: "Ornn", key: "Ornn", sets: ["SFD"], domains: [2, 3], quote: "Fine, we go." },
+      { name: "Pyke", key: "Pyke", sets: ["UNL"], domains: [1, 5], quote: "Sink 'em all." },
+      { name: "Poppy", key: "Poppy", sets: ["UNL"], domains: [4, 6], quote: "I'm no hero—just a Yordle with a hammer." },
+      { name: "Rek'Sai", key: "RekSai", sets: ["SFD"], domains: [1, 6], quote: "Rek'Sai growls" },
       { name: "Renekton", key: "Renekton", sets: ["VND"], domains: [], quote: "As I live, all will die!" },
-      { name: "Renata Glasc", key: "Renata", sets: ["SFD"], domains: [], quote: "Everyone has a price. I just make it... obvious." },
-      { name: "Rengar", key: "Rengar", sets: ["UNL"], domains: [], quote: "Tonight, we hunt!" },
-      { name: "Rumble", key: "Rumble", sets: ["SFD"], domains: [], quote: "Let's get in the fight!" },
+      { name: "Renata Glasc", key: "Renata", sets: ["SFD"], domains: [3, 6], quote: "Everyone has a price. I just make it... obvious." },
+      { name: "Rengar", key: "Rengar", sets: ["UNL"], domains: [1, 4], quote: "Tonight, we hunt!" },
+      { name: "Rumble", key: "Rumble", sets: ["SFD"], domains: [1, 3], quote: "Let's get in the fight!" },
       { name: "Seraphine", key: "Seraphine", sets: ["RDN"], domains: [], quote: "Let's change the world!" },
-      { name: "Sett", key: "Sett", sets: ["OGN"], domains: [], quote: "I'm undisputed." },
-      { name: "Shen", key: "Shen", sets: ["VND"], domains: [], quote: "A demonstration of superior judgement." },
-      { name: "Sivir", key: "Sivir", sets: ["SFD"], domains: [], quote: "I always take my toll; blood, or gold." },
-      { name: "Teemo", key: "Teemo", sets: ["OGN"], domains: [], quote: "Captain Teemo on duty." },
-      { name: "Vi", key: "Vi", sets: ["UNL"], domains: [], quote: "Punch first. Ask questions while punching." },
-      { name: "Vex", key: "Vex", sets: ["UNL"], domains: [], quote: "'Kay. See if I care." },
-      { name: "Viktor", key: "Viktor", sets: ["OGN"], domains: [], quote: "Join the glorious evolution." },
-      { name: "Volibear", key: "Volibear", sets: ["OGN"], domains: [], quote: "Feel the power of the wild." },
-      { name: "Yasuo", key: "Yasuo", sets: ["OGN"], domains: [], quote: "Death is like the wind—always by my side." },
-      { name: "Zed", key: "Zed", sets: ["VND"], domains: [], quote: "The unseen blade is the deadliest." },
+      { name: "Sett", key: "Sett", sets: ["OGN"], domains: [4, 6], quote: "I'm undisputed." },
+      { name: "Shen", key: "Shen", sets: ["VND"], domains: [2, 6], quote: "A demonstration of superior judgement." },
+      { name: "Sivir", key: "Sivir", sets: ["SFD"], domains: [4, 5], quote: "I always take my toll; blood, or gold." },
+      { name: "Teemo", key: "Teemo", sets: ["OGN"], domains: [3, 5], quote: "Captain Teemo on duty." },
+      { name: "Vi", key: "Vi", sets: ["UNL"], domains: [1, 6], quote: "Punch first. Ask questions while punching." },
+      { name: "Vex", key: "Vex", sets: ["UNL"], domains: [2, 5], quote: "'Kay. See if I care." },
+      { name: "Viktor", key: "Viktor", sets: ["OGN"], domains: [3, 6], quote: "Join the glorious evolution." },
+      { name: "Volibear", key: "Volibear", sets: ["OGN"], domains: [1, 4], quote: "Feel the power of the wild." },
+      { name: "Yasuo", key: "Yasuo", sets: ["OGN"], domains: [2, 5], quote: "Death is like the wind—always by my side." },
+      { name: "Zed", key: "Zed", sets: ["VND"], domains: [1, 5], quote: "The unseen blade is the deadliest." },
     ];
 
     const STORAGE_KEY = 'riftbound_tracker_v3';
@@ -1110,6 +1113,14 @@
       }, 300);
     }
 
+    function domainIconHtml(champ, type) {
+      const domainIdx = type === 'conq' ? 0 : 1;
+      const domainId = champ.domains[domainIdx];
+      if (domainId === undefined) return `<div class="history-dot-fb ${type}"></div>`;
+      const domain = DOMAINS.find(d => d.id === domainId);
+      return `<img class="history-icon" src="${domain.icon}" alt="">`;
+    }
+
     function render() {
       const grid = document.getElementById('players-grid');
       grid.innerHTML = '';
@@ -1172,9 +1183,10 @@
             el.className = 'history-item';
 
             if (isOwn) {
+              const iconHtml = domainIconHtml(champ, entry.type);
               if (pi === 0) {
                 el.innerHTML = `
-              <div class="history-dot ${entry.type}"></div>
+              ${iconHtml}
               <div class="history-text">${POINT_TYPES[entry.type]}</div>
               ${isLastOwn ? '<div class="history-undo">undo</div>' : ''}
               <div class="history-num">${labelMap[realIndex]}</div>
@@ -1184,15 +1196,15 @@
               <div class="history-num">${labelMap[realIndex]}</div>
               ${isLastOwn ? '<div class="history-undo">undo</div>' : ''}
               <div class="history-text" style="text-align:right">${POINT_TYPES[entry.type]}</div>
-              <div class="history-dot ${entry.type}"></div>
+              ${iconHtml}
             `;
               }
               if (isLastOwn) el.addEventListener('click', () => promptDelete(pi));
             } else {
               if (pi === 0) {
-                el.innerHTML = `<div class="history-dot other" style="opacity:0.25;"></div><div class="history-text" style="opacity:0;">—</div>`;
+                el.innerHTML = `<div style="width:10px;height:10px;flex-shrink:0;"></div><div class="history-text" style="opacity:0;">—</div>`;
               } else {
-                el.innerHTML = `<div class="history-text" style="opacity:0;">—</div><div class="history-dot other" style="opacity:0.25;"></div>`;
+                el.innerHTML = `<div class="history-text" style="opacity:0;">—</div><div style="width:10px;height:10px;flex-shrink:0;"></div>`;
               }
             }
             hist.appendChild(el);
