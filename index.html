@@ -1,984 +1,1099 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Riftbound — Point Tracker</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Riftbound — Point Tracker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  :root {
-    --bg: #fff;
-    --fg: #000;
-    --bg2: #eee;
-    --border: #000;
-    --border-dim: #ddd;
-    --text-dim: #444;
-    --text-faint: #bbb;
-    --text-empty: #bbb;
-    --history-active: #fee;
-  }
+    :root {
+      --bg: #fff;
+      --fg: #000;
+      --bg2: #eee;
+      --border: #000;
+      --border-dim: #ddd;
+      --text-dim: #444;
+      --text-faint: #bbb;
+      --text-empty: #bbb;
+      --history-active: #fee;
+    }
 
-  body.dark {
-    --bg: #111;
-    --fg: #fff;
-    --bg2: #222;
-    --border: #fff;
-    --border-dim: #444;
-    --text-dim: #bbb;
-    --text-faint: #555;
-    --text-empty: #555;
-    --history-active: #311;
-  }
+    body.dark {
+      --bg: #111;
+      --fg: #fff;
+      --bg2: #222;
+      --border: #fff;
+      --border-dim: #444;
+      --text-dim: #bbb;
+      --text-faint: #555;
+      --text-empty: #555;
+      --history-active: #311;
+    }
 
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: system-ui, sans-serif;
-    height: 100dvh;
-    overflow: hidden;
-  }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, sans-serif;
+      height: 100dvh;
+      overflow: hidden;
+    }
 
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-  }
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+    }
 
-  /* ── HEADER ── */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    gap: 6px;
-  }
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 6px;
+    }
 
-  .header h1 {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    flex-shrink: 0;
-  }
+    .header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
 
-  .header-controls {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-  }
+    .header-controls {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
 
-  .hbtn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--fg);
-    font-family: inherit;
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 3px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    white-space: nowrap;
-    -webkit-tap-highlight-color: transparent;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    height: 26px;
-  }
-  .hbtn svg { display: block; }
-  .hbtn:active { background: var(--fg); color: var(--bg); }
-  .hbtn.active { background: var(--fg); color: var(--bg); }
+    .hbtn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      height: 26px;
+    }
 
-  /* ── PLAYERS GRID ── */
-  .players {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    flex: 1;
-    overflow: hidden;
-    border-top: none;
-  }
+    .hbtn svg {
+      display: block;
+    }
 
-  .player {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .player:first-child { border-right: 1px solid var(--border); }
+    .hbtn:active {
+      background: var(--fg);
+      color: var(--bg);
+    }
 
-  /* ── CHAMPION PORTRAIT ── */
-  .champion-frame {
-    position: relative;
-    width: 100%;
-    height: 60px;
-    overflow: hidden;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    -webkit-tap-highlight-color: transparent;
-  }
+    .hbtn.active {
+      background: var(--fg);
+      color: var(--bg);
+    }
 
-  .champion-img-wrap {
-    position: relative;
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0;
-    overflow: hidden;
-    cursor: pointer;
-  }
+    /* ── PLAYERS GRID ── */
+    .players {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+      border-top: none;
+    }
 
-  .champion-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-    display: block;
-  }
+    .player {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-  .champion-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 45%);
-    pointer-events: none;
-  }
+    .player:first-child {
+      border-right: 1px solid var(--border);
+    }
 
-  .champion-name {
-    position: absolute;
-    bottom: 3px;
-    left: 0; right: 0;
-    text-align: center;
-    font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #fff;
-    text-transform: uppercase;
-    padding: 0 2px;
-    pointer-events: none;
-  }
+    /* ── CHAMPION PORTRAIT ── */
+    .champion-frame {
+      position: relative;
+      width: 100%;
+      height: 60px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  .champion-arrows {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    flex: 1;
-    padding: 0 8px;
-  }
+    .champion-img-wrap {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      overflow: hidden;
+      cursor: pointer;
+    }
 
-  .champion-arrow {
-    flex: 1;
-    height: 60px;
-    background: var(--bg);
-    border: none;
-    border-left: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--fg);
-    font-size: 1.4rem;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    line-height: 1;
-  }
-  .champion-arrow:first-child { border-left: none; border-right: 1px solid var(--border); }
-  .champion-arrow:active { background: var(--fg); color: var(--bg); }
+    .champion-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
 
-  /* ── MIDDLE ── */
-  .middle {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 6px 4px;
-    gap: 6px;
-    overflow: hidden;
-    min-height: 0;
-  }
+    .champion-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 45%);
+      pointer-events: none;
+    }
 
-  .score-number {
-    font-size: clamp(6rem, 26vw, 11rem);
-    font-weight: 900;
-    line-height: 1;
-    color: var(--fg);
-    flex-shrink: 0;
-    transition: transform 0.12s;
-    padding: 10px 0;
-  }
-  .score-number.bump { transform: scale(1.18); }
+    .champion-name {
+      position: absolute;
+      bottom: 3px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #fff;
+      text-transform: uppercase;
+      padding: 0 2px;
+      pointer-events: none;
+    }
 
-  /* ── HISTORY ── */
-  .history-panel {
-    width: 100%;
-    flex: 1;
-    overflow-y: auto;
-    border-top: 1px solid var(--border-dim);
-    padding-top: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-height: 0;
-  }
+    .champion-arrows {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1;
+      padding: 0 8px;
+    }
 
-  .history-empty {
-    font-size: 0.6rem;
-    color: var(--text-faint);
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 6px 0;
-  }
+    .champion-arrow {
+      flex: 1;
+      height: 60px;
+      background: var(--bg);
+      border: none;
+      border-left: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      font-size: 1.4rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+    }
 
-  .history-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 2px;
-    border-radius: 2px;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .history-item:active { background: var(--history-active); }
+    .champion-arrow:first-child {
+      border-left: none;
+      border-right: 1px solid var(--border);
+    }
 
-  .history-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .history-dot.conq { background: #000; }
-  .history-dot.hold { background: #666; }
-  .history-dot.other { background: #aaa; }
+    .champion-arrow:active {
+      background: var(--fg);
+      color: var(--bg);
+    }
 
-  .history-text {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+    /* ── MIDDLE ── */
+    .middle {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 6px 4px;
+      gap: 6px;
+      overflow: hidden;
+      min-height: 0;
+    }
 
-  .history-undo {
-    font-size: 0.75rem;
-    color: var(--text-faint);
-    flex-shrink: 0;
-  }
+    .score-number {
+      font-size: clamp(6rem, 26vw, 11rem);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--fg);
+      flex-shrink: 0;
+      transition: transform 0.12s;
+      padding: 10px 0;
+    }
 
-  /* ── BUTTONS ── */
-  .action-buttons {
-    flex-shrink: 0;
-    border-top: 1px solid var(--border);
-  }
+    .score-number.bump {
+      transform: scale(1.18);
+    }
 
-  .btn {
-    display: block;
-    width: 100%;
-    padding: 14px 6px;
-    background: var(--bg);
-    border: none;
-    border-bottom: 1px solid var(--border);
-    font-family: inherit;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    color: var(--fg);
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn:last-child { border-bottom: none; }
-  .btn:active { background: var(--fg); color: var(--bg); }
-  .btn-main {
-    padding: 28px 6px;
-    font-size: 1.1rem;
-  }
+    /* ── HISTORY ── */
+    .history-panel {
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      border-top: 1px solid var(--border-dim);
+      padding-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-height: 0;
+    }
 
-  /* ── MODALS ── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s;
-  }
-  .modal-overlay.visible { opacity: 1; pointer-events: all; }
+    .history-empty {
+      font-size: 0.6rem;
+      color: var(--text-faint);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 6px 0;
+    }
 
-  .modal {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px;
-    width: 100%;
-    max-width: 300px;
-  }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 2px;
+      border-radius: 2px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  .modal h2 {
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
-    text-align: center;
-  }
+    .history-item:active {
+      background: var(--history-active);
+    }
 
-  .modal p {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin-bottom: 16px;
-    color: var(--text-dim);
-    text-align: center;
-  }
-  .modal p span { font-weight: 700; color: var(--fg); }
+    .history-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
 
-  .modal-buttons { display: flex; gap: 8px; }
+    .history-dot.conq {
+      background: #000;
+    }
 
-  .modal-btn {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-family: inherit;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    background: var(--bg);
-    color: var(--fg);
-    -webkit-tap-highlight-color: transparent;
-  }
-  .modal-btn:active { background: var(--fg); color: var(--bg); }
+    .history-dot.hold {
+      background: #666;
+    }
 
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(8px);
-    background: var(--fg);
-    color: var(--bg);
-    border-radius: 4px;
-    padding: 8px 16px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s, transform 0.2s;
-    white-space: nowrap;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .history-dot.other {
+      background: #aaa;
+    }
 
-  /* ── CHAMPION PICKER MODAL ── */
-  .modal-champ-picker {
-    max-width: 360px;
-    width: 95vw;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-  }
-  .champ-picker-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    text-align: center;
-    margin-bottom: 12px;
-  }
-  .champ-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    overflow-y: auto;
-    padding: 4px 2px 8px;
-  }
-  .champ-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    border: 2px solid transparent;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .champ-option:active { background: var(--bg2); }
-  .champ-option.selected { border-color: var(--border); }
-  .champ-option img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    object-position: top center;
-    border-radius: 3px;
-    display: block;
-  }
-  .champ-option span {
-    font-size: 9px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-  .champ-picker-cancel {
-    margin-top: 12px;
-    flex-shrink: 0;
-  }
+    .history-text {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  /* ── MATCH HISTORY OVERLAY ── */
-  .history-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 150;
-    display: flex;
-    flex-direction: column;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s;
-  }
-  .history-overlay.visible { opacity: 1; pointer-events: all; }
+    .history-undo {
+      font-size: 0.75rem;
+      color: var(--text-faint);
+      flex-shrink: 0;
+    }
 
-  .history-overlay-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .history-overlay-title {
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
+    /* ── BUTTONS ── */
+    .action-buttons {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+    }
 
-  .history-stats-bar {
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border-dim);
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px 6px;
+      background: var(--bg);
+      border: none;
+      border-bottom: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      color: var(--fg);
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  .history-match-list {
-    flex: 1;
-    overflow-y: auto;
-  }
+    .btn:last-child {
+      border-bottom: none;
+    }
 
-  .history-match-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border-dim);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .history-match-row:active { background: var(--bg2); }
-  .history-match-row.draw { }
+    .btn:active {
+      background: var(--fg);
+      color: var(--bg);
+    }
 
-  .history-portraits {
-    display: flex;
-    gap: 3px;
-    flex-shrink: 0;
-  }
-  .history-portrait {
-    width: 32px;
-    height: 32px;
-    object-fit: cover;
-    object-position: top center;
-    border: 1px solid var(--border-dim);
-    display: block;
-  }
+    .btn-main {
+      padding: 28px 6px;
+      font-size: 1.1rem;
+    }
 
-  .history-match-info {
-    flex: 1;
-    min-width: 0;
-  }
-  .history-match-score {
-    font-size: 0.85rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .history-match-meta {
-    font-size: 0.62rem;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-top: 2px;
-  }
+    /* ── MODALS ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
 
-  .history-badge {
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 2px 5px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    flex-shrink: 0;
-  }
-  .history-badge { cursor: pointer; }
+    .modal-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
 
-  .history-match-detail {
-    padding: 8px 10px 10px;
-    border-bottom: 1px solid var(--border-dim);
-    background: var(--bg2);
-  }
-  .history-detail-heading {
-    font-size: 0.62rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-  .history-detail-tl {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    max-height: 160px;
-    overflow-y: auto;
-  }
-  .history-detail-entry {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
-  }
-  .history-detail-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .history-detail-dot.conq { background: var(--fg); }
-  .history-detail-dot.hold { background: #666; }
-  .history-detail-dot.other { background: #aaa; }
-  .history-detail-label {
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-dim);
-  }
-  .history-detail-player {
-    color: var(--text-faint);
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-  .history-detail-empty {
-    font-size: 0.65rem;
-    color: var(--text-faint);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
+    .modal {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+      width: 100%;
+      max-width: 300px;
+    }
 
-  .history-no-records {
-    padding: 24px 10px;
-    text-align: center;
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-faint);
-  }
+    .modal h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
 
-  .history-footer {
-    padding: 10px;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-</style>
+    .modal p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .modal p span {
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .modal-btn:active {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--fg);
+      color: var(--bg);
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── CHAMPION PICKER MODAL ── */
+    .modal-champ-picker {
+      max-width: 360px;
+      width: 95vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .champ-picker-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .champ-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      overflow-y: auto;
+      padding: 4px 2px 8px;
+    }
+
+    .champ-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .champ-option:active {
+      background: var(--bg2);
+    }
+
+    .champ-option.selected {
+      border-color: var(--border);
+    }
+
+    .champ-option img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 3px;
+      display: block;
+    }
+
+    .champ-option span {
+      font-size: 9px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .champ-picker-cancel {
+      margin-top: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ── MATCH HISTORY OVERLAY ── */
+    .history-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 150;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+
+    .history-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .history-overlay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .history-overlay-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-stats-bar {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-dim);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .history-match-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .history-match-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-dim);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .history-match-row:active {
+      background: var(--bg2);
+    }
+
+    .history-match-row.draw {}
+
+    .history-portraits {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .history-portrait {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      object-position: top center;
+      border: 1px solid var(--border-dim);
+      display: block;
+    }
+
+    .history-match-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history-match-score {
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-match-meta {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+
+    .history-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 5px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .history-badge {
+      cursor: pointer;
+    }
+
+    .history-match-detail {
+      padding: 8px 10px 10px;
+      border-bottom: 1px solid var(--border-dim);
+      background: var(--bg2);
+    }
+
+    .history-detail-heading {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .history-detail-tl {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+
+    .history-detail-entry {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+    }
+
+    .history-detail-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .history-detail-dot.conq {
+      background: var(--fg);
+    }
+
+    .history-detail-dot.hold {
+      background: #666;
+    }
+
+    .history-detail-dot.other {
+      background: #aaa;
+    }
+
+    .history-detail-label {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+    }
+
+    .history-detail-player {
+      color: var(--text-faint);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .history-detail-empty {
+      font-size: 0.65rem;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-no-records {
+      padding: 24px 10px;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-faint);
+    }
+
+  </style>
 </head>
+
 <body>
 
-<div class="app">
-  <div class="header">
-    <h1>RiftCounter</h1>
-    <div class="header-controls">
-      <button class="hbtn" id="btn-timer" onclick="toggleTimer()">60:00</button>
-      <button class="hbtn" id="btn-aspirant" onclick="cycleAspirant()">Aspirant: 0</button>
-      <button class="hbtn" id="btn-theme" onclick="toggleTheme()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
-      <button class="hbtn" onclick="openHistory()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
-      <button class="hbtn" onclick="promptReset()">Reset</button>
+  <div class="app">
+    <div class="header">
+      <h1>RiftCounter</h1>
+      <div class="header-controls">
+        <button class="hbtn" id="btn-timer" onclick="toggleTimer()">60:00</button>
+        <button class="hbtn" id="btn-aspirant" onclick="cycleAspirant()">Aspirant: 0</button>
+        <button class="hbtn" id="btn-theme" onclick="toggleTheme()"><svg width="14" height="14" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg></button>
+        <button class="hbtn" onclick="openHistory()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg></button>
+        <button class="hbtn" onclick="promptReset()">Reset</button>
+      </div>
+    </div>
+    <div class="players" id="players-grid"></div>
+  </div>
+
+  <!-- Modal: Time's up -->
+  <div class="modal-overlay" id="modal-timesup">
+    <div class="modal" style="max-width: 280px;">
+      <h2>Time's Up</h2>
+      <p>60 minutes have passed.</p>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="closeModal('modal-timesup')">OK</button>
+      </div>
     </div>
   </div>
-  <div class="players" id="players-grid"></div>
-</div>
 
-<!-- Modal: Time's up -->
-<div class="modal-overlay" id="modal-timesup">
-  <div class="modal" style="max-width: 280px;">
-    <h2>Time's Up</h2>
-    <p>60 minutes have passed.</p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-timesup')">OK</button>
+  <!-- Modal: Reset timer -->
+  <div class="modal-overlay" id="modal-timer-reset">
+    <div class="modal" style="max-width: 280px;">
+      <h2>Reset Timer</h2>
+      <p>Reset the timer back to 60:00?</p>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="closeModal('modal-timer-reset')">Cancel</button>
+        <button class="modal-btn" onclick="confirmTimerReset()">Reset</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal: Reset timer -->
-<div class="modal-overlay" id="modal-timer-reset">
-  <div class="modal" style="max-width: 280px;">
-    <h2>Reset Timer</h2>
-    <p>Reset the timer back to 60:00?</p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-timer-reset')">Cancel</button>
-      <button class="modal-btn" onclick="confirmTimerReset()">Reset</button>
+  <!-- Modal: Geez -->
+  <div class="modal-overlay" id="modal-geez">
+    <div class="modal" style="max-width: 280px;">
+      <h2>GG</h2>
+      <p id="modal-geez-text"></p>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="closeModal('modal-geez')">Well Played</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal: Geez -->
-<div class="modal-overlay" id="modal-geez">
-  <div class="modal" style="max-width: 280px;">
-    <h2>GG</h2>
-    <p id="modal-geez-text"></p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-geez')">Well Played</button>
+  <!-- Modal: Delete last point -->
+  <div class="modal-overlay" id="modal-delete">
+    <div class="modal">
+      <p id="modal-delete-text">Delete last point scored?</p>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="closeModal('modal-delete')">Cancel</button>
+        <button class="modal-btn" onclick="confirmDelete()">Delete</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal: Delete last point -->
-<div class="modal-overlay" id="modal-delete">
-  <div class="modal">
-    <p id="modal-delete-text">Delete last point scored?</p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-delete')">Cancel</button>
-      <button class="modal-btn" onclick="confirmDelete()">Delete</button>
+  <!-- Modal: Save before reset -->
+  <div class="modal-overlay" id="modal-save-before-reset">
+    <div class="modal" style="max-width: 300px;">
+      <h2>Save Match?</h2>
+      <p>Save this match to history before resetting?</p>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="closeModal('modal-save-before-reset')">Cancel</button>
+        <button class="modal-btn" onclick="skipSaveAndReset()">Skip</button>
+        <button class="modal-btn" onclick="saveAndReset()">Save</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal: Save before reset -->
-<div class="modal-overlay" id="modal-save-before-reset">
-  <div class="modal" style="max-width: 300px;">
-    <h2>Save Match?</h2>
-    <p>Save this match to history before resetting?</p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-save-before-reset')">Cancel</button>
-      <button class="modal-btn" onclick="skipSaveAndReset()">Skip</button>
-      <button class="modal-btn" onclick="saveAndReset()">Save</button>
+  <!-- Modal: Reset game -->
+  <div class="modal-overlay" id="modal-reset">
+    <div class="modal">
+      <h2>Reset Game</h2>
+      <p>Clear all points and history for <span>both players</span>? Champion selections will be kept.</p>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="closeModal('modal-reset')">Cancel</button>
+        <button class="modal-btn" onclick="confirmReset()">Reset</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal: Reset game -->
-<div class="modal-overlay" id="modal-reset">
-  <div class="modal">
-    <h2>Reset Game</h2>
-    <p>Clear all points and history for <span>both players</span>? Champion selections will be kept.</p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-reset')">Cancel</button>
-      <button class="modal-btn" onclick="confirmReset()">Reset</button>
+  <!-- Modal: Clear history confirm -->
+  <!-- Modal: Change match result -->
+  <div class="modal-overlay" id="modal-change-result" style="z-index: 200;">
+    <div class="modal" style="max-width: 280px;">
+      <h2>Change Match Result</h2>
+      <div class="modal-buttons">
+        <button class="modal-btn" onclick="applyChangeResult(1)">Win</button>
+        <button class="modal-btn" onclick="applyChangeResult(2)">Loss</button>
+        <button class="modal-btn" onclick="applyChangeResult(null)">Draw</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal: Clear history confirm -->
-<!-- Modal: Change match result -->
-<div class="modal-overlay" id="modal-change-result" style="z-index: 200;">
-  <div class="modal" style="max-width: 280px;">
-    <h2>Change Match Result</h2>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="applyChangeResult('completed', 0)">Win</button>
-      <button class="modal-btn" onclick="applyChangeResult('completed', 1)">Loss</button>
-      <button class="modal-btn" onclick="applyChangeResult('draw', null)">Draw</button>
+
+  <!-- Modal: Champion picker -->
+  <div class="modal-overlay" id="modal-champ-picker">
+    <div class="modal modal-champ-picker">
+      <div class="champ-picker-title">Choose Champion</div>
+      <div class="champ-grid" id="champ-grid"></div>
+      <div class="modal-buttons champ-picker-cancel">
+        <button class="modal-btn" onclick="closeModal('modal-champ-picker')">Cancel</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modal-clear-history">
-  <div class="modal" style="max-width: 280px;">
-    <h2>Clear History</h2>
-    <p>Delete all saved match records? This cannot be undone.</p>
-    <div class="modal-buttons">
-      <button class="modal-btn" onclick="closeModal('modal-clear-history')">Cancel</button>
-      <button class="modal-btn" onclick="confirmClearHistory()">Clear</button>
+  <!-- Match History Overlay -->
+  <div class="history-overlay" id="history-overlay">
+    <div class="history-overlay-header">
+      <span class="history-overlay-title">Riftcounter History</span>
+      <button class="hbtn" onclick="closeHistory()">&#x2715;</button>
     </div>
+    <div class="history-stats-bar" id="history-stats-bar"></div>
+    <div class="history-match-list" id="history-match-list"></div>
   </div>
-</div>
 
-<!-- Modal: Champion picker -->
-<div class="modal-overlay" id="modal-champ-picker">
-  <div class="modal modal-champ-picker">
-    <div class="champ-picker-title">Choose Champion</div>
-    <div class="champ-grid" id="champ-grid"></div>
-    <div class="modal-buttons champ-picker-cancel">
-      <button class="modal-btn" onclick="closeModal('modal-champ-picker')">Cancel</button>
-    </div>
-  </div>
-</div>
+  <div class="toast" id="toast"></div>
 
-<!-- Match History Overlay -->
-<div class="history-overlay" id="history-overlay">
-  <div class="history-overlay-header">
-    <span class="history-overlay-title">Riftcounter History</span>
-    <button class="hbtn" onclick="closeHistory()">&#x2715;</button>
-  </div>
-  <div class="history-stats-bar" id="history-stats-bar"></div>
-  <div class="history-match-list" id="history-match-list"></div>
-  <div class="history-footer">
-    <button class="btn" onclick="openModal('modal-clear-history')">Clear History</button>
-  </div>
-</div>
+  <script>
+    const DD_VERSION = '15.1.1';
+    const DD_BASE = `https://ddragon.leagueoflegends.com/cdn/${DD_VERSION}/img/champion`;
 
-<div class="toast" id="toast"></div>
+    const CHAMPIONS = [
+      { name: "Ahri", key: "Ahri", set: "OGN" },
+      { name: "Annie", key: "Annie", set: "OGS" },
+      { name: "Azir", key: "Azir", set: "SFD" },
+      { name: "Darius", key: "Darius", set: "OGN" },
+      { name: "Diana", key: "Diana", set: "UNL" },
+      { name: "Draven", key: "Draven", set: "SFD" },
+      { name: "Ezreal", key: "Ezreal", set: "SFD" },
+      { name: "Fiora", key: "Fiora", set: "SFD" },
+      { name: "Garen", key: "Garen", set: "OGS" },
+      { name: "Irelia", key: "Irelia", set: "SFD" },
+      { name: "Ivern", key: "Ivern", set: "UNL" },
+      { name: "Jax", key: "Jax", set: "SFD" },
+      { name: "Jhin", key: "Jhin", set: "UNL" },
+      { name: "Jinx", key: "Jinx", set: "OGN" },
+      { name: "Kai'Sa", key: "Kaisa", set: "OGN" },
+      { name: "Kha'Zix", key: "Khazix", set: "UNL" },
+      { name: "LeBlanc", key: "Leblanc", set: "UNL" },
+      { name: "Lee Sin", key: "LeeSin", set: "OGN" },
+      { name: "Lillia", key: "Lillia", set: "UNL" },
+      { name: "Lucian", key: "Lucian", set: "SFD" },
+      { name: "Lux", key: "Lux", set: "OGS" },
+      { name: "Master Yi", key: "MasterYi", set: "OGS" },
+      { name: "Ornn", key: "Ornn", set: "SFD" },
+      { name: "Poppy", key: "Poppy", set: "UNL" },
+      { name: "Rek'Sai", key: "RekSai", set: "SFD" },
+      { name: "Renata Glasc", key: "Renata", set: "SFD" },
+      { name: "Rengar", key: "Rengar", set: "UNL" },
+      { name: "Rumble", key: "Rumble", set: "SFD" },
+      { name: "Seraphine", key: "Seraphine", set: null },
+      { name: "Sett", key: "Sett", set: "OGN" },
+      { name: "Shen", key: "Shen", set: null },
+      { name: "Sivir", key: "Sivir", set: "SFD" },
+      { name: "Teemo", key: "Teemo", set: "OGN" },
+      { name: "Vi", key: "Vi", set: "UNL" },
+      { name: "Vex", key: "Vex", set: "UNL" },
+      { name: "Viktor", key: "Viktor", set: "OGN" },
+      { name: "Volibear", key: "Volibear", set: "OGN" },
+      { name: "Yasuo", key: "Yasuo", set: "OGN" },
+      { name: "Zed", key: "Zed", set: null },
+    ];
 
-<script>
-const DD_VERSION = '15.1.1';
-const DD_BASE = `https://ddragon.leagueoflegends.com/cdn/${DD_VERSION}/img/champion`;
+    const STORAGE_KEY = 'riftbound_tracker_v3';
 
-const CHAMPIONS = [
-  { name: "Ahri",         key: "Ahri" },
-  { name: "Annie",        key: "Annie" },
-  { name: "Azir",         key: "Azir" },
-  { name: "Darius",       key: "Darius" },
-  { name: "Diana",        key: "Diana" },
-  { name: "Draven",       key: "Draven" },
-  { name: "Evelynn",      key: "Evelynn" },
-  { name: "Ezreal",       key: "Ezreal" },
-  { name: "Fiora",        key: "Fiora" },
-  { name: "Garen",        key: "Garen" },
-  { name: "Irelia",       key: "Irelia" },
-  { name: "Ivern",        key: "Ivern" },
-  { name: "Jax",          key: "Jax" },
-  { name: "Jhin",         key: "Jhin" },
-  { name: "Jinx",         key: "Jinx" },
-  { name: "Kai'Sa",       key: "Kaisa" },
-  { name: "Kha'Zix",      key: "Khazix" },
-  { name: "LeBlanc",      key: "Leblanc" },
-  { name: "Lee Sin",      key: "LeeSin" },
-  { name: "Lillia",       key: "Lillia" },
-  { name: "Lucian",       key: "Lucian" },
-  { name: "Lux",          key: "Lux" },
-  { name: "Master Yi",    key: "MasterYi" },
-  { name: "Ornn",         key: "Ornn" },
-  { name: "Poppy",        key: "Poppy" },
-  { name: "Rek'Sai",      key: "RekSai" },
-  { name: "Renata Glasc", key: "Renata" },
-  { name: "Rengar",       key: "Rengar" },
-  { name: "Rumble",       key: "Rumble" },
-  { name: "Seraphine",    key: "Seraphine" },
-  { name: "Sett",         key: "Sett" },
-  { name: "Shen",         key: "Shen" },
-  { name: "Sivir",        key: "Sivir" },
-  { name: "Teemo",        key: "Teemo" },
-  { name: "Vi",           key: "Vi" },
-  { name: "Vex",          key: "Vex" },
-  { name: "Viktor",       key: "Viktor" },
-  { name: "Volibear",     key: "Volibear" },
-  { name: "Yasuo",        key: "Yasuo" },
-  { name: "Zed",          key: "Zed" },
-];
+    const POINT_TYPES = {
+      conq:  'Conquer',
+      hold:  'Hold',
+      other: 'Other',
+    };
+    const HISTORY_KEY = 'riftcounter_history';
+    const BASE_MAX = 8;
 
-const STORAGE_KEY = 'riftbound_tracker_v3';
-const HISTORY_KEY = 'riftcounter_history';
-const BASE_MAX = 8;
+    // Settings (persisted separately)
+    let settings = { aspirant: 0, dark: false };
 
-// Settings (persisted separately)
-let settings = { aspirant: 0, dark: false };
+    function maxPoints() { return BASE_MAX + settings.aspirant; }
 
-function maxPoints() { return BASE_MAX + settings.aspirant; }
-
-function loadSettings() {
-  try {
-    const raw = localStorage.getItem('riftbound_settings');
-    if (raw) settings = { ...settings, ...JSON.parse(raw) };
-  } catch(e) {}
-}
-
-function saveSettings() {
-  try { localStorage.setItem('riftbound_settings', JSON.stringify(settings)); } catch(e) {}
-}
-
-function toggleTheme() {
-  settings.dark = !settings.dark;
-  applyTheme();
-  saveSettings();
-}
-
-function applyTheme() {
-  document.body.classList.toggle('dark', !!settings.dark);
-  const btn = document.getElementById('btn-theme');
-  if (btn) btn.innerHTML = settings.dark
-    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
-    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-}
-
-function cycleAspirant() {
-  settings.aspirant = (settings.aspirant + 1) % 3;
-  saveSettings();
-  updateHeaderButtons();
-}
-
-// ── TIMER ──
-let timerInterval = null;
-let timerSeconds = 60 * 60;
-let timerRunning = false;
-
-function loadTimer() {
-  try {
-    const raw = localStorage.getItem('riftbound_timer');
-    if (raw) {
-      const t = JSON.parse(raw);
-      timerSeconds = t.seconds ?? 60 * 60;
-      timerRunning = false; // never auto-resume after refresh
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem('riftbound_settings');
+        if (raw) settings = { ...settings, ...JSON.parse(raw) };
+      } catch (e) { }
     }
-  } catch(e) {}
-}
 
-function saveTimer() {
-  try { localStorage.setItem('riftbound_timer', JSON.stringify({ seconds: timerSeconds })); } catch(e) {}
-}
+    function saveSettings() {
+      try { localStorage.setItem('riftbound_settings', JSON.stringify(settings)); } catch (e) { }
+    }
 
-function toggleTimer() {
-  if (timerSeconds <= 0) {
-    timerSeconds = 60 * 60;
-    clearInterval(timerInterval);
-    timerRunning = false;
-    saveTimer();
-    updateTimerBtn();
-    return;
-  }
+    function toggleTheme() {
+      settings.dark = !settings.dark;
+      applyTheme();
+      saveSettings();
+    }
 
-  if (timerRunning) {
-    openModal('modal-timer-reset');
-  } else {
-    timerRunning = true;
-    timerInterval = setInterval(() => {
-      timerSeconds--;
-      saveTimer();
-      updateTimerBtn();
+    function applyTheme() {
+      document.body.classList.toggle('dark', !!settings.dark);
+      const btn = document.getElementById('btn-theme');
+      if (btn) btn.innerHTML = settings.dark
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    }
+
+    function cycleAspirant() {
+      settings.aspirant = (settings.aspirant + 1) % 3;
+      saveSettings();
+      updateHeaderButtons();
+    }
+
+    // ── TIMER ──
+    let timerInterval = null;
+    let timerSeconds = 60 * 60;
+    let timerRunning = false;
+
+    function loadTimer() {
+      try {
+        const raw = localStorage.getItem('riftbound_timer');
+        if (raw) {
+          const t = JSON.parse(raw);
+          timerSeconds = t.seconds ?? 60 * 60;
+          timerRunning = false; // never auto-resume after refresh
+        }
+      } catch (e) { }
+    }
+
+    function saveTimer() {
+      try { localStorage.setItem('riftbound_timer', JSON.stringify({ seconds: timerSeconds })); } catch (e) { }
+    }
+
+    function toggleTimer() {
       if (timerSeconds <= 0) {
+        timerSeconds = 60 * 60;
         clearInterval(timerInterval);
         timerRunning = false;
-        timerSeconds = 0;
-        openModal('modal-timesup');
+        saveTimer();
+        updateTimerBtn();
+        return;
       }
-    }, 1000);
-    updateTimerBtn();
-  }
-}
 
-function confirmTimerReset() {
-  clearInterval(timerInterval);
-  timerRunning = false;
-  timerSeconds = 60 * 60;
-  saveTimer();
-  updateTimerBtn();
-  closeModal('modal-timer-reset');
-}
-
-function updateTimerBtn() {
-  const btn = document.getElementById('btn-timer');
-  if (!btn) return;
-  const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
-  const s = (timerSeconds % 60).toString().padStart(2, '0');
-  btn.textContent = `${m}:${s}`;
-  btn.classList.toggle('active', timerRunning);
-}
-
-function updateHeaderButtons() {
-  const aspirantLabels = ['Aspirant: 0', 'Aspirant: 1', 'Aspirant: 2'];
-  const ab = document.getElementById('btn-aspirant');
-  if (ab) {
-    ab.textContent = aspirantLabels[settings.aspirant];
-    ab.classList.toggle('active', settings.aspirant > 0);
-  }
-}
-
-function defaultState() {
-  return {
-    players: [
-      { champIndex: 0, score: 0 },
-      { champIndex: 1, score: 0 },
-    ],
-    timeline: [] // { pi, type, label }
-  };
-}
-
-let state = defaultState();
-let pendingDeletePlayer = null;
-let matchAlreadySaved = false;
-let matchStartedAt = null;
-let saveTimeout = null;
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const loaded = JSON.parse(raw);
-      if (loaded.players?.length === 2) {
-        // Migrate old format (per-player history) to timeline
-        if (!loaded.timeline) {
-          loaded.timeline = [];
-          const max = Math.max(loaded.players[0].history?.length || 0, loaded.players[1].history?.length || 0);
-          for (let i = 0; i < max; i++) {
-            [0,1].forEach(pi => {
-              const h = loaded.players[pi].history;
-              if (h && h[i]) loaded.timeline.push({ pi, ...h[i] });
-            });
+      if (timerRunning) {
+        openModal('modal-timer-reset');
+      } else {
+        timerRunning = true;
+        timerInterval = setInterval(() => {
+          timerSeconds--;
+          saveTimer();
+          updateTimerBtn();
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            timerSeconds = 0;
+            openModal('modal-timesup');
           }
-          loaded.players.forEach(p => { delete p.history; });
-        }
-        loaded.players.forEach(p => {
-          if (p.champIndex >= CHAMPIONS.length) p.champIndex = 0;
-        });
-        state = loaded;
+        }, 1000);
+        updateTimerBtn();
       }
     }
-  } catch(e) {}
-}
 
-function saveState() {
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-  }, 300);
-}
+    function confirmTimerReset() {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      timerSeconds = 60 * 60;
+      saveTimer();
+      updateTimerBtn();
+      closeModal('modal-timer-reset');
+    }
 
-function render() {
-  const grid = document.getElementById('players-grid');
-  grid.innerHTML = '';
+    function updateTimerBtn() {
+      const btn = document.getElementById('btn-timer');
+      if (!btn) return;
+      const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+      const s = (timerSeconds % 60).toString().padStart(2, '0');
+      btn.textContent = `${m}:${s}`;
+      btn.classList.toggle('active', timerRunning);
+    }
 
-  state.players.forEach((player, pi) => {
-    const champ = CHAMPIONS[player.champIndex];
-    const col = document.createElement('div');
-    col.className = 'player';
+    function updateHeaderButtons() {
+      const aspirantLabels = ['Aspirant: 0', 'Aspirant: 1', 'Aspirant: 2'];
+      const ab = document.getElementById('btn-aspirant');
+      if (ab) {
+        ab.textContent = aspirantLabels[settings.aspirant];
+        ab.classList.toggle('active', settings.aspirant > 0);
+      }
+    }
 
-    // Champion portrait
-    const frame = document.createElement('div');
-    frame.className = 'champion-frame';
-    frame.innerHTML = `
+    function defaultState() {
+      return {
+        players: [
+          { champIndex: 0, score: 0 },
+          { champIndex: 1, score: 0 },
+        ],
+        timeline: [] // { playerId, type, label }
+      };
+    }
+
+    let state = defaultState();
+    let pendingDeletePlayer = null;
+    let matchAlreadySaved = false;
+    let saveTimeout = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const loaded = JSON.parse(raw);
+          if (loaded.players?.length === 2) {
+            // Migrate old format (per-player history) to timeline
+            if (!loaded.timeline) {
+              loaded.timeline = [];
+              const max = Math.max(loaded.players[0].history?.length || 0, loaded.players[1].history?.length || 0);
+              for (let i = 0; i < max; i++) {
+                [0, 1].forEach(pi => {
+                  const h = loaded.players[pi].history;
+                  if (h && h[i]) loaded.timeline.push({ playerId: pi + 1, ...h[i] });
+                });
+              }
+              loaded.players.forEach(p => { delete p.history; });
+            }
+            loaded.players.forEach(p => {
+              if (p.champIndex >= CHAMPIONS.length) p.champIndex = 0;
+            });
+            state = loaded;
+          }
+        }
+      } catch (e) { }
+    }
+
+    function saveState() {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
+      }, 300);
+    }
+
+    function render() {
+      const grid = document.getElementById('players-grid');
+      grid.innerHTML = '';
+
+      state.players.forEach((player, pi) => {
+        const champ = CHAMPIONS[player.champIndex];
+        const col = document.createElement('div');
+        col.className = 'player';
+
+        // Champion portrait
+        const frame = document.createElement('div');
+        frame.className = 'champion-frame';
+        frame.innerHTML = `
       <div class="champion-arrow" onclick="cycleChamp(${pi},-1)">&#8249;</div>
       <div class="champion-img-wrap" onclick="openChampPicker(${pi})">
         <img class="champion-img" src="${DD_BASE}/${champ.key}.png" alt="${champ.name}" onerror="this.style.opacity='0'">
@@ -987,415 +1102,397 @@ function render() {
       </div>
       <div class="champion-arrow" onclick="cycleChamp(${pi},1)">&#8250;</div>
     `;
-    col.appendChild(frame);
+        col.appendChild(frame);
 
-    // Middle: score + history
-    const middle = document.createElement('div');
-    middle.className = 'middle';
+        // Middle: score + history
+        const middle = document.createElement('div');
+        middle.className = 'middle';
 
-    const scoreEl = document.createElement('div');
-    scoreEl.className = 'score-number';
-    scoreEl.id = `score-${pi}`;
-    scoreEl.textContent = player.score;
-    middle.appendChild(scoreEl);
+        const scoreEl = document.createElement('div');
+        scoreEl.className = 'score-number';
+        scoreEl.id = `score-${pi}`;
+        scoreEl.textContent = player.score;
+        middle.appendChild(scoreEl);
 
-    const hist = document.createElement('div');
-    hist.className = 'history-panel';
+        const hist = document.createElement('div');
+        hist.className = 'history-panel';
 
-    const timeline = state.timeline || [];
-    if (timeline.length === 0) {
-      hist.innerHTML = `<div class="history-empty">No points yet</div>`;
-    } else {
-      // Count points per player up to each index for labeling
-      const counts = [0, 0];
-      const labelMap = timeline.map(e => {
-        counts[e.pi]++;
-        return counts[e.pi];
-      });
+        const timeline = state.timeline || [];
+        if (timeline.length === 0) {
+          hist.innerHTML = `<div class="history-empty">No points yet</div>`;
+        } else {
+          // Count points per player up to each index for labeling
+          const counts = [0, 0];
+          const labelMap = timeline.map(e => {
+            counts[e.playerId - 1]++;
+            return counts[e.playerId - 1];
+          });
 
-      // Find the last entry belonging to this player (for undo)
-      let lastOwnIndex = -1;
-      for (let i = timeline.length - 1; i >= 0; i--) {
-        if (timeline[i].pi === pi) { lastOwnIndex = i; break; }
-      }
+          // Find the last entry belonging to this player (for undo)
+          let lastOwnIndex = -1;
+          for (let i = timeline.length - 1; i >= 0; i--) {
+            if (timeline[i].playerId === pi + 1) { lastOwnIndex = i; break; }
+          }
 
-      [...timeline].reverse().forEach((entry, ri) => {
-        const realIndex = timeline.length - 1 - ri;
-        const isOwn = entry.pi === pi;
-        const isLastOwn = realIndex === lastOwnIndex;
+          [...timeline].reverse().forEach((entry, ri) => {
+            const realIndex = timeline.length - 1 - ri;
+            const isOwn = entry.playerId === pi + 1;
+            const isLastOwn = realIndex === lastOwnIndex;
 
-        const el = document.createElement('div');
-        el.className = 'history-item';
+            const el = document.createElement('div');
+            el.className = 'history-item';
 
-        if (isOwn) {
-          el.innerHTML = `
+            if (isOwn) {
+              el.innerHTML = `
             <div class="history-dot ${entry.type}"></div>
-            <div class="history-text">${entry.label} ${labelMap[realIndex]}</div>
+            <div class="history-text">${POINT_TYPES[entry.type]} ${labelMap[realIndex]}</div>
             ${isLastOwn ? '<div class="history-undo">↩ undo</div>' : ''}
           `;
-          if (isLastOwn) el.addEventListener('click', () => promptDelete(pi));
-        } else {
-          el.innerHTML = `<div class="history-dot other" style="opacity:0.25;"></div>`;
+              if (isLastOwn) el.addEventListener('click', () => promptDelete(pi));
+            } else {
+              el.innerHTML = `<div class="history-dot other" style="opacity:0.25;"></div>`;
+            }
+            hist.appendChild(el);
+          });
         }
-        hist.appendChild(el);
-      });
-    }
-    middle.appendChild(hist);
-    col.appendChild(middle);
+        middle.appendChild(hist);
+        col.appendChild(middle);
 
-    // Buttons
-    const btns = document.createElement('div');
-    btns.className = 'action-buttons';
-    btns.innerHTML = `
-      <button class="btn btn-main" style="border-bottom: none;" onclick="addPoint(${pi},'conq','Conquer')">Conquer</button>
+        // Buttons
+        const btns = document.createElement('div');
+        btns.className = 'action-buttons';
+        btns.innerHTML = `
+      <button class="btn btn-main" style="border-bottom: none;" onclick="addPoint(${pi},'conq')">Conquer</button>
       <div style="display:flex; align-items: stretch; border-top: 1px solid var(--border);">
-        <button class="btn btn-main" style="flex: 7; border-right: 1px solid var(--border); border-top: none; border-bottom: none;" onclick="addPoint(${pi},'hold','Hold')">Hold</button>
-        <button class="btn btn-main" style="flex: 3; border-top: none; border-bottom: none;" onclick="addPoint(${pi},'other','Other')">Other</button>
+        <button class="btn btn-main" style="flex: 7; border-right: 1px solid var(--border); border-top: none; border-bottom: none;" onclick="addPoint(${pi},'hold')">Hold</button>
+        <button class="btn btn-main" style="flex: 3; border-top: none; border-bottom: none;" onclick="addPoint(${pi},'other')">Other</button>
       </div>
     `;
-    col.appendChild(btns);
+        col.appendChild(btns);
 
-    grid.appendChild(col);
-  });
-}
+        grid.appendChild(col);
+      });
+    }
 
-function cycleChamp(pi, dir) {
-  state.players[pi].champIndex = (state.players[pi].champIndex + dir + CHAMPIONS.length) % CHAMPIONS.length;
-  saveState(); render();
-}
+    function cycleChamp(pi, dir) {
+      state.players[pi].champIndex = (state.players[pi].champIndex + dir + CHAMPIONS.length) % CHAMPIONS.length;
+      saveState(); render();
+    }
 
-let _champPickerPlayer = 0;
+    let _champPickerPlayer = 0;
 
-function openChampPicker(pi) {
-  _champPickerPlayer = pi;
-  const currentIdx = state.players[pi].champIndex;
-  document.getElementById('champ-grid').innerHTML = CHAMPIONS.map((c, i) => `
+    function openChampPicker(pi) {
+      _champPickerPlayer = pi;
+      const currentIdx = state.players[pi].champIndex;
+      document.getElementById('champ-grid').innerHTML = CHAMPIONS.map((c, i) => `
     <div class="champ-option${i === currentIdx ? ' selected' : ''}" onclick="selectChamp(${i})">
       <img src="${DD_BASE}/${c.key}.png" alt="${c.name}" onerror="this.style.opacity='0'">
       <span>${c.name}</span>
     </div>
   `).join('');
-  openModal('modal-champ-picker');
-}
-
-function selectChamp(champIndex) {
-  state.players[_champPickerPlayer].champIndex = champIndex;
-  saveState(); render();
-  closeModal('modal-champ-picker');
-}
-
-function addPoint(pi, type, label) {
-  const p = state.players[pi];
-  const winner = state.players.findIndex(p => p.score >= maxPoints());
-  if (winner !== -1) {
-    if (!matchAlreadySaved) {
-      saveMatchToHistory(buildMatchRecord('completed', winner));
-      matchAlreadySaved = true;
+      openModal('modal-champ-picker');
     }
-    const champName = CHAMPIONS[state.players[winner].champIndex].name;
-    document.getElementById('modal-geez-text').textContent = `${champName} has reached max points`;
-    openModal('modal-geez');
-    return;
-  }
-  if (!matchStartedAt) matchStartedAt = Date.now();
-  p.score++;
-  state.timeline.push({ pi, type, label });
-  saveState(); render();
-  const el = document.getElementById(`score-${pi}`);
-  if (el) { el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 150); }
-}
 
-function promptDelete(pi) {
-  // Find last entry for this player
-  const tl = state.timeline;
-  let lastIdx = -1;
-  for (let i = tl.length - 1; i >= 0; i--) {
-    if (tl[i].pi === pi) { lastIdx = i; break; }
-  }
-  if (lastIdx === -1) return;
-  pendingDeletePlayer = pi;
-  document.getElementById('modal-delete-text').innerHTML = `Delete last point? (<span>${tl[lastIdx].label}</span>)`;
-  openModal('modal-delete');
-}
+    function selectChamp(champIndex) {
+      state.players[_champPickerPlayer].champIndex = champIndex;
+      saveState(); render();
+      closeModal('modal-champ-picker');
+    }
 
-function confirmDelete() {
-  const tl = state.timeline;
-  let lastIdx = -1;
-  for (let i = tl.length - 1; i >= 0; i--) {
-    if (tl[i].pi === pendingDeletePlayer) { lastIdx = i; break; }
-  }
-  if (lastIdx !== -1) {
-    tl.splice(lastIdx, 1);
-    state.players[pendingDeletePlayer].score = Math.max(0, state.players[pendingDeletePlayer].score - 1);
-    saveState(); render();
-    showToast('Point removed');
-  }
-  closeModal('modal-delete');
-}
+    function addPoint(pi, type) {
+      const p = state.players[pi];
+      const winnerIdx = state.players.findIndex(p => p.score >= maxPoints());
+      if (winnerIdx !== -1) {
+        if (!matchAlreadySaved) {
+          saveMatchToHistory(buildMatchRecord(winnerIdx + 1));
+          matchAlreadySaved = true;
+        }
+        const champName = CHAMPIONS[state.players[winnerIdx].champIndex].name;
+        document.getElementById('modal-geez-text').textContent = `${champName} has reached max points`;
+        openModal('modal-geez');
+        return;
+      }
+      p.score++;
+      state.timeline.push({ playerId: pi + 1, type });
+      saveState(); render();
+      const el = document.getElementById(`score-${pi}`);
+      if (el) { el.classList.add('bump'); setTimeout(() => el.classList.remove('bump'), 150); }
+    }
 
-function promptReset() {
-  const hasPoints = state.players.some(p => p.score > 0);
-  if (hasPoints && !matchAlreadySaved) {
-    openModal('modal-save-before-reset');
-  } else {
-    openModal('modal-reset');
-  }
-}
+    function promptDelete(pi) {
+      // Find last entry for this player
+      const tl = state.timeline;
+      let lastIdx = -1;
+      for (let i = tl.length - 1; i >= 0; i--) {
+        if (tl[i].playerId === pi + 1) { lastIdx = i; break; }
+      }
+      if (lastIdx === -1) return;
+      pendingDeletePlayer = pi;
+      document.getElementById('modal-delete-text').innerHTML = `Delete last point? (<span>${POINT_TYPES[tl[lastIdx].type]}</span>)`;
+      openModal('modal-delete');
+    }
 
-function saveAndReset() {
-  const winnerIdx = state.players.findIndex(p => p.score >= maxPoints());
-  const status = winnerIdx !== -1 ? 'completed' : 'draw';
-  const winner = winnerIdx !== -1 ? winnerIdx : null;
-  saveMatchToHistory(buildMatchRecord(status, winner));
-  closeModal('modal-save-before-reset');
-  openModal('modal-reset');
-  showToast('Match saved');
-}
+    function confirmDelete() {
+      const tl = state.timeline;
+      let lastIdx = -1;
+      for (let i = tl.length - 1; i >= 0; i--) {
+        if (tl[i].playerId === pendingDeletePlayer + 1) { lastIdx = i; break; }
+      }
+      if (lastIdx !== -1) {
+        tl.splice(lastIdx, 1);
+        state.players[pendingDeletePlayer].score = Math.max(0, state.players[pendingDeletePlayer].score - 1);
+        saveState(); render();
+        showToast('Point removed');
+      }
+      closeModal('modal-delete');
+    }
 
-function skipSaveAndReset() {
-  closeModal('modal-save-before-reset');
-  openModal('modal-reset');
-}
+    function promptReset() {
+      const hasPoints = state.players.some(p => p.score > 0);
+      if (hasPoints && !matchAlreadySaved) {
+        openModal('modal-save-before-reset');
+      } else {
+        openModal('modal-reset');
+      }
+    }
 
-function confirmReset() {
-  state.players.forEach(p => { p.score = 0; });
-  state.timeline = [];
-  matchAlreadySaved = false;
-  matchStartedAt = null;
-  saveState(); render();
-  closeModal('modal-reset');
-  showToast('Game reset');
-}
+    function saveAndReset() {
+      const winnerIdx = state.players.findIndex(p => p.score >= maxPoints());
+      const winner = winnerIdx !== -1 ? winnerIdx + 1 : null;
+      saveMatchToHistory(buildMatchRecord(winner));
+      closeModal('modal-save-before-reset');
+      openModal('modal-reset');
+      showToast('Match saved');
+    }
 
-function openModal(id) { document.getElementById(id).classList.add('visible'); }
-function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+    function skipSaveAndReset() {
+      closeModal('modal-save-before-reset');
+      openModal('modal-reset');
+    }
 
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('visible'); });
-});
+    function confirmReset() {
+      state.players.forEach(p => { p.score = 0; });
+      state.timeline = [];
+      matchAlreadySaved = false;
+      saveState(); render();
+      closeModal('modal-reset');
+      showToast('Game reset');
+    }
 
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
-}
+    function openModal(id) { document.getElementById(id).classList.add('visible'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
 
-// ── MATCH HISTORY ──
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('visible'); });
+    });
 
-function loadHistory() {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return [];
-}
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+    }
 
-function saveMatchToHistory(record) {
-  try {
-    const records = loadHistory();
-    records.unshift(record);
-    if (records.length > 200) records.splice(200);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(records));
-  } catch(e) {}
-}
+    // ── MATCH HISTORY ──
 
-function buildMatchRecord(status, winnerIdx) {
-  return {
-    id: Date.now(),
-    date: new Date().toISOString(),
-    duration: matchStartedAt ? Math.floor((Date.now() - matchStartedAt) / 1000) : 0,
-    players: state.players.map((p, i) => ({
-      name: `Player ${i + 1}`,
-      champion: CHAMPIONS[p.champIndex].name,
-      champKey: CHAMPIONS[p.champIndex].key,
-      score: p.score,
-    })),
-    maxPoints: maxPoints(),
-    aspirant: settings.aspirant,
-    winner: winnerIdx,
-    status,
-    timeline: [...state.timeline],
-  };
-}
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) { }
+      return [];
+    }
 
-function fmtDuration(secs) {
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
-  const s = (secs % 60).toString().padStart(2, '0');
-  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
-}
+    function saveMatchToHistory(record) {
+      try {
+        const records = loadHistory();
+        records.unshift(record);
+        if (records.length > 200) records.splice(200);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(records));
+      } catch (e) { }
+    }
 
-function fmtDate(iso) {
-  const d = new Date(iso);
-  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  return `${date} · ${time}`;
-}
+    function buildMatchRecord(winnerIdx) {
+      return {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        players: state.players.map((p, i) => ({
+          id: i + 1,
+          champKey: CHAMPIONS[p.champIndex].key,
+          score: p.score,
+        })),
+        maxPoints: maxPoints(),
+        winner: winnerIdx,
+        timeline: [...state.timeline],
+      };
+    }
 
-function openHistory() {
-  renderHistoryOverlay();
-  document.getElementById('history-overlay').classList.add('visible');
-}
 
-function closeHistory() {
-  document.getElementById('history-overlay').classList.remove('visible');
-}
+    function fmtDate(iso) {
+      const d = new Date(iso);
+      const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      return `${date} · ${time}`;
+    }
 
-function renderHistoryOverlay() {
-  const records = loadHistory();
-  renderHistoryStats(records);
-  renderHistoryList(records);
-}
+    function openHistory() {
+      renderHistoryOverlay();
+      document.getElementById('history-overlay').classList.add('visible');
+    }
 
-function renderHistoryStats(records) {
-  const bar = document.getElementById('history-stats-bar');
-  if (records.length === 0) { bar.textContent = 'No matches yet'; return; }
+    function closeHistory() {
+      document.getElementById('history-overlay').classList.remove('visible');
+    }
 
-  const wins = records.filter(r => r.winner === 0).length;
-  const losses = records.filter(r => r.winner === 1).length;
-  const decided = wins + losses;
-  const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+    function renderHistoryOverlay() {
+      const records = loadHistory();
+      renderHistoryStats(records);
+      renderHistoryList(records);
+    }
 
-  bar.innerHTML = `
+    function renderHistoryStats(records) {
+      const bar = document.getElementById('history-stats-bar');
+      if (records.length === 0) { bar.textContent = 'No matches yet'; return; }
+
+      const wins = records.filter(r => r.winner === 1).length;
+      const losses = records.filter(r => r.winner === 2).length;
+      const decided = wins + losses;
+      const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+
+      bar.innerHTML = `
     <span>${records.length} match${records.length !== 1 ? 'es' : ''}</span>
     <span>${wins}W · ${losses}L</span>
     ${winRate !== null ? `<span>${winRate}% win rate</span>` : ''}
   `;
-}
+    }
 
-function renderHistoryList(records) {
-  const list = document.getElementById('history-match-list');
-  if (records.length === 0) {
-    list.innerHTML = '<div class="history-no-records">No matches recorded yet</div>';
-    return;
-  }
-
-  list.innerHTML = '';
-  let expandedId = null;
-
-  records.forEach(record => {
-    const isDraw = record.status === 'draw' || record.status === 'abandoned'; // backwards-compat
-    const p0 = record.players[0];
-    const p1 = record.players[1];
-    const winnerName = record.winner != null ? record.players[record.winner].champion : null;
-
-    const row = document.createElement('div');
-    row.className = 'history-match-row' + (isDraw ? ' draw' : '');
-    row.innerHTML = `
-      <div class="history-portraits">
-        <img class="history-portrait" src="${DD_BASE}/${p0.champKey}.png" alt="${p0.champion}" onerror="this.style.opacity='0.2'">
-        <img class="history-portrait" src="${DD_BASE}/${p1.champKey}.png" alt="${p1.champion}" onerror="this.style.opacity='0.2'">
-      </div>
-      <div class="history-match-info">
-        <div class="history-match-score">${p0.champion} ${p0.score} — ${p1.score} ${p1.champion}</div>
-        <div class="history-match-meta">${fmtDate(record.date)}</div>
-      </div>
-      <div class="history-badge">${isDraw ? 'Draw' : record.winner === 0 ? 'Win' : 'Loss'}</div>
-    `;
-
-    row.querySelector('.history-badge').addEventListener('click', e => {
-      e.stopPropagation();
-      openChangeResult(record.id);
-    });
-
-    row.addEventListener('click', () => {
-      const existing = row.nextElementSibling;
-      if (existing && existing.classList.contains('history-match-detail')) {
-        existing.remove();
-        expandedId = null;
+    function renderHistoryList(records) {
+      const list = document.getElementById('history-match-list');
+      if (records.length === 0) {
+        list.innerHTML = '<div class="history-no-records">No matches recorded yet</div>';
         return;
       }
-      // Close any open detail
-      const openDetail = list.querySelector('.history-match-detail');
-      if (openDetail) openDetail.remove();
 
-      if (expandedId === record.id) { expandedId = null; return; }
-      expandedId = record.id;
+      list.innerHTML = '';
+      let expandedId = null;
 
-      const detail = document.createElement('div');
-      detail.className = 'history-match-detail';
+      records.forEach(record => {
+        const isDraw = record.winner === null;
+        const p0 = record.players[0];
+        const p1 = record.players[1];
+        const winnerPlayer = record.winner != null ? record.players.find(p => p.id === record.winner) : null;
+        const winnerName = winnerPlayer ? CHAMPIONS.find(c => c.key === winnerPlayer.champKey)?.name : null;
 
-      let tlHtml = '';
-      if (record.timeline && record.timeline.length > 0) {
-        const counts = [0, 0];
-        tlHtml = `<div class="history-detail-tl">` + record.timeline.map(e => {
-          counts[e.pi]++;
-          return `<div class="history-detail-entry">
+        const row = document.createElement('div');
+        row.className = 'history-match-row' + (isDraw ? ' draw' : '');
+        row.innerHTML = `
+      <div class="history-portraits">
+        <img class="history-portrait" src="${DD_BASE}/${p0.champKey}.png" alt="${p0.champKey}" onerror="this.style.opacity='0.2'">
+        <img class="history-portrait" src="${DD_BASE}/${p1.champKey}.png" alt="${p1.champKey}" onerror="this.style.opacity='0.2'">
+      </div>
+      <div class="history-match-info">
+        <div class="history-match-score">${CHAMPIONS.find(c => c.key === p0.champKey)?.name ?? p0.champKey} ${p0.score} — ${p1.score} ${CHAMPIONS.find(c => c.key === p1.champKey)?.name ?? p1.champKey}</div>
+        <div class="history-match-meta">${fmtDate(record.date)}</div>
+      </div>
+      <div class="history-badge">${isDraw ? 'Draw' : record.winner === 1 ? 'Win' : 'Loss'}</div>
+    `;
+
+        row.querySelector('.history-badge').addEventListener('click', e => {
+          e.stopPropagation();
+          openChangeResult(record.id);
+        });
+
+        row.addEventListener('click', () => {
+          const existing = row.nextElementSibling;
+          if (existing && existing.classList.contains('history-match-detail')) {
+            existing.remove();
+            expandedId = null;
+            return;
+          }
+          // Close any open detail
+          const openDetail = list.querySelector('.history-match-detail');
+          if (openDetail) openDetail.remove();
+
+          if (expandedId === record.id) { expandedId = null; return; }
+          expandedId = record.id;
+
+          const detail = document.createElement('div');
+          detail.className = 'history-match-detail';
+
+          let tlHtml = '';
+          if (record.timeline && record.timeline.length > 0) {
+            const counts = [0, 0];
+            tlHtml = `<div class="history-detail-tl">` + record.timeline.map(e => {
+              counts[e.playerId - 1]++;
+              return `<div class="history-detail-entry">
             <div class="history-detail-dot ${e.type}"></div>
-            <span class="history-detail-label">${e.label} ${counts[e.pi]}</span>
-            <span class="history-detail-player">${record.players[e.pi].champion}</span>
+            <span class="history-detail-label">${POINT_TYPES[e.type]} ${counts[e.playerId - 1]}</span>
+            <span class="history-detail-player">${(() => { const pl = record.players.find(p => p.id === e.playerId); return CHAMPIONS.find(c => c.key === pl?.champKey)?.name ?? pl?.champKey; })()}</span>
           </div>`;
-        }).join('') + `</div>`;
-      } else {
-        tlHtml = `<div class="history-detail-empty">No timeline entries</div>`;
-      }
+            }).join('') + `</div>`;
+          } else {
+            tlHtml = `<div class="history-detail-empty">No timeline entries</div>`;
+          }
 
-      const resultLine = isDraw
-        ? 'Draw'
-        : `${winnerName} wins · max ${record.maxPoints}pts`;
+          const resultLine = isDraw
+            ? 'Draw'
+            : `${winnerName} wins`;
 
-      detail.innerHTML = `
+          detail.innerHTML = `
         <div class="history-detail-heading">${resultLine}</div>
         ${tlHtml}
       `;
-      row.insertAdjacentElement('afterend', detail);
+          row.insertAdjacentElement('afterend', detail);
+        });
+
+        list.appendChild(row);
+      });
+    }
+
+    let editingRecordId = null;
+
+    function openChangeResult(recordId) {
+      editingRecordId = recordId;
+      openModal('modal-change-result');
+    }
+
+    function applyChangeResult(winner) {
+      try {
+        const records = loadHistory();
+        const idx = records.findIndex(r => r.id === editingRecordId);
+        if (idx !== -1) {
+          records[idx].winner = winner;
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(records));
+        }
+      } catch (e) { }
+      closeModal('modal-change-result');
+      renderHistoryOverlay();
+    }
+
+
+    loadSettings();
+    loadState();
+    loadTimer();
+    render();
+    updateHeaderButtons();
+    updateTimerBtn();
+    applyTheme();
+
+    // ── WAKE LOCK ──
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (e) { }
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
     });
-
-    list.appendChild(row);
-  });
-}
-
-let editingRecordId = null;
-
-function openChangeResult(recordId) {
-  editingRecordId = recordId;
-  openModal('modal-change-result');
-}
-
-function applyChangeResult(status, winner) {
-  try {
-    const records = loadHistory();
-    const idx = records.findIndex(r => r.id === editingRecordId);
-    if (idx !== -1) {
-      records[idx].status = status;
-      records[idx].winner = winner;
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(records));
-    }
-  } catch(e) {}
-  closeModal('modal-change-result');
-  renderHistoryOverlay();
-}
-
-function confirmClearHistory() {
-  try { localStorage.removeItem(HISTORY_KEY); } catch(e) {}
-  closeModal('modal-clear-history');
-  renderHistoryOverlay();
-  showToast('History cleared');
-}
-
-loadSettings();
-loadState();
-loadTimer();
-render();
-updateHeaderButtons();
-updateTimerBtn();
-applyTheme();
-
-// ── WAKE LOCK ──
-let wakeLock = null;
-async function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
-  } catch(e) {}
-}
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') requestWakeLock();
-});
-requestWakeLock();
-</script>
+    requestWakeLock();
+  </script>
 </body>
+
 </html>
