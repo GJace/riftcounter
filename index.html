@@ -661,6 +661,25 @@
       cursor: pointer;
     }
 
+    .history-delete-btn {
+      font-size: 0.75rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 2px 5px;
+      border: 1px solid #c0392b;
+      border-radius: 2px;
+      background: transparent;
+      color: #c0392b;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .history-delete-btn:active {
+      background: #c0392b;
+      color: #fff;
+    }
+
     .history-match-detail {
       padding: 8px 10px 10px;
       border-bottom: 1px solid var(--border-dim);
@@ -1449,11 +1468,17 @@
         <div class="history-match-meta">${fmtDate(record.date)}</div>
       </div>
       <div class="history-badge">${isDraw ? 'Draw' : record.winner === 1 ? 'Win' : 'Loss'}</div>
+      <button class="history-delete-btn" title="Delete entry">✕</button>
     `;
 
         row.querySelector('.history-badge').addEventListener('click', e => {
           e.stopPropagation();
           openChangeResult(record.id);
+        });
+
+        row.querySelector('.history-delete-btn').addEventListener('click', e => {
+          e.stopPropagation();
+          deleteHistoryEntry(record.id);
         });
 
         row.addEventListener('click', () => {
@@ -1522,6 +1547,15 @@
         }
       } catch (e) { }
       closeModal('modal-change-result');
+      renderHistoryOverlay();
+    }
+
+    function deleteHistoryEntry(recordId) {
+      try {
+        const records = loadHistory();
+        const filtered = records.filter(r => r.id !== recordId);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(filtered));
+      } catch (e) { }
       renderHistoryOverlay();
     }
 
